@@ -1,0 +1,36 @@
+name: Audit
+
+on:
+  workflow_call:
+
+jobs:
+  audit:
+    name: Run audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+
+      - name: Install staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@latest
+
+
+      - name: Create .envrc file
+        run: |
+          touch .envrc
+#          "export DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .envrc
+#          "export SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .envrc
+#          "export SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .envrc
+#          "export SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .envrc
+#          "export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .envrc
+#          "export SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .envrc
+#          "export CORS_TRUSTED_ORIGINS=${{ secrets.CORS_TRUSTED_ORIGINS }}" >> .envrc
+#          "export API_PORT=${{ secrets.API_PORT }}" >> .envrc
+#          "export API_ENV=${{ secrets.API_ENV }}" >> .envrc
+
+      - name: Run make audit
+        run: make audit

@@ -1,0 +1,38 @@
+version: "3.9"
+
+services:
+  database:
+    image: postgres
+    container_name: postgres
+    hostname: db
+    ports:
+      - "5432:5432"
+    volumes:
+      - database:/var/lib/postgresql/data/
+    environment:
+      POSTGRES_USER: "greenlight"
+      POSTGRES_PASSWORD: "pa55word"
+      POSTGRES_DB: "greenlight"
+    restart: always
+
+  greenlight:
+    build:
+      context: .
+      args:
+        API_VERSION: "v1.0.0"
+        API_PORT: "8080"
+        API_ENV: "staging"
+      dockerfile: Dockerfile
+    container_name: greenlight-api
+    hostname: greenlight-api
+    env_file: .env
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    command: [ "/bin/api"]
+
+
+
+volumes:
+  database:
