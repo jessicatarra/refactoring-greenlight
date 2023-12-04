@@ -49,6 +49,11 @@ func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenReposi
 func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 	user := &entity.User{Name: input.Name, Email: input.Email, Activated: false}
 
+	err := user.Password.Set(input.Password)
+	if err != nil {
+		return nil, err
+	}
+
 	v := validator.New()
 
 	ValidateUser(v, user)
@@ -58,7 +63,7 @@ func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 		return nil, err
 	}
 
-	err := a.userRepo.InsertNewUser(user)
+	err = a.userRepo.InsertNewUser(user)
 
 	if err != nil {
 		return nil, err
