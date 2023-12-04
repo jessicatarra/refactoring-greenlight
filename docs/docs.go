@@ -81,7 +81,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/data.Movie"
+                                "$ref": "#/definitions/database.Movie"
                             }
                         }
                     }
@@ -119,7 +119,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Movie created",
                         "schema": {
-                            "$ref": "#/definitions/data.Movie"
+                            "$ref": "#/definitions/database.Movie"
                         }
                     }
                 }
@@ -156,7 +156,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Movie details",
                         "schema": {
-                            "$ref": "#/definitions/data.Movie"
+                            "$ref": "#/definitions/database.Movie"
                         }
                     }
                 }
@@ -200,7 +200,7 @@ const docTemplate = `{
                     "200": {
                         "description": "Movie updated",
                         "schema": {
-                            "$ref": "#/definitions/data.Movie"
+                            "$ref": "#/definitions/database.Movie"
                         }
                     }
                 }
@@ -266,7 +266,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Authentication token",
                         "schema": {
-                            "$ref": "#/definitions/data.Token"
+                            "$ref": "#/definitions/database.Token"
                         }
                     }
                 }
@@ -292,7 +292,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.createUserRequest"
+                            "$ref": "#/definitions/app.CreateUserRequest"
                         }
                     }
                 ],
@@ -300,7 +300,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/data.User"
+                            "$ref": "#/definitions/entity.User"
                         }
                     }
                 }
@@ -332,7 +332,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/data.User"
+                            "$ref": "#/definitions/database.User"
                         }
                     }
                 }
@@ -340,7 +340,21 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "data.Movie": {
+        "app.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "database.Movie": {
             "type": "object",
             "properties": {
                 "genres": {
@@ -367,7 +381,7 @@ const docTemplate = `{
                 }
             }
         },
-        "data.Token": {
+        "database.Token": {
             "type": "object",
             "properties": {
                 "expiry": {
@@ -378,7 +392,27 @@ const docTemplate = `{
                 }
             }
         },
-        "data.User": {
+        "database.User": {
+            "type": "object",
+            "properties": {
+                "activated": {
+                    "type": "boolean"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.User": {
             "type": "object",
             "properties": {
                 "activated": {
@@ -426,20 +460,6 @@ const docTemplate = `{
                 },
                 "year": {
                     "type": "integer"
-                }
-            }
-        },
-        "main.createUserRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
                 }
             }
         },

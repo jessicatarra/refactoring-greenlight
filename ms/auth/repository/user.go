@@ -6,15 +6,20 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/jessicatarra/greenlight/ms/auth/app"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
 	_ "github.com/lib/pq"
 	"time"
 )
 
+var (
+	ErrEditConflict   = errors.New("edit conflict")
+	ErrRecordNotFound = errors.New("record not found")
+	ErrDuplicateEmail = errors.New("duplicate email")
+)
+
 const defaultTimeout = 3 * time.Second
 
-type Repository interface {
+type UserRepository interface {
 	InsertNewUser(user *entity.User) error
 	GetUserByEmail(email string) (*entity.User, error)
 	UpdateUser(user *entity.User) error
@@ -22,11 +27,15 @@ type Repository interface {
 	GetUserById(id int64) (*entity.User, error)
 }
 
-type repository struct {
+type userRepository struct {
 	db *sql.DB
 }
 
-func (r repository) InsertNewUser(user *entity.User) error {
+func NewUserRepo(db *sql.DB) UserRepository {
+	return &userRepository{db: db}
+}
+
+func (r *userRepository) InsertNewUser(user *entity.User) error {
 	query := `
         INSERT INTO users (name, email, password_hash, activated) 
         VALUES ($1, $2, $3, $4)
@@ -41,7 +50,7 @@ func (r repository) InsertNewUser(user *entity.User) error {
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return app.ErrDuplicateEmail
+			return ErrDuplicateEmail
 		default:
 			return err
 		}
@@ -50,7 +59,7 @@ func (r repository) InsertNewUser(user *entity.User) error {
 	return nil
 }
 
-func (r repository) GetUserByEmail(email string) (*entity.User, error) {
+func (r *userRepository) GetUserByEmail(email string) (*entity.User, error) {
 	query := `
         SELECT id, created_at, name, email, password_hash, activated, version
         FROM users
@@ -74,7 +83,7 @@ func (r repository) GetUserByEmail(email string) (*entity.User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, app.ErrRecordNotFound
+			return nil, ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -83,7 +92,7 @@ func (r repository) GetUserByEmail(email string) (*entity.User, error) {
 	return &user, nil
 }
 
-func (r repository) UpdateUser(user *entity.User) error {
+func (r *userRepository) UpdateUser(user *entity.User) error {
 	query := `
         UPDATE users 
         SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
@@ -106,9 +115,9 @@ func (r repository) UpdateUser(user *entity.User) error {
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return app.ErrDuplicateEmail
+			return ErrDuplicateEmail
 		case errors.Is(err, sql.ErrNoRows):
-			return app.ErrEditConflict
+			return ErrEditConflict
 		default:
 			return err
 		}
@@ -117,7 +126,7 @@ func (r repository) UpdateUser(user *entity.User) error {
 	return nil
 }
 
-func (r repository) GetForToken(tokenScope string, tokenPlaintext string) (*entity.User, error) {
+func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (*entity.User, error) {
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
 	query := `
@@ -148,7 +157,7 @@ func (r repository) GetForToken(tokenScope string, tokenPlaintext string) (*enti
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, app.ErrRecordNotFound
+			return nil, ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -157,7 +166,7 @@ func (r repository) GetForToken(tokenScope string, tokenPlaintext string) (*enti
 	return &user, nil
 }
 
-func (r repository) GetUserById(id int64) (*entity.User, error) {
+func (r *userRepository) GetUserById(id int64) (*entity.User, error) {
 	query := `
         SELECT id, created_at, name, email, password_hash, activated, version
         FROM users
@@ -181,7 +190,7 @@ func (r repository) GetUserById(id int64) (*entity.User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, app.ErrRecordNotFound
+			return nil, ErrRecordNotFound
 		default:
 			return nil, err
 		}

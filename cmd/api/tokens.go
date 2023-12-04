@@ -21,7 +21,7 @@ type createAuthTokenRequest struct {
 // @Accept json
 // @Produce json
 // @Param request body createAuthTokenRequest true "Request body"
-// @Success 201 {object} data.Token "Authentication token"
+// @Success 201 {object} database.Token "Authentication token"
 // @Router /tokens/authentication [post]
 func (app *application) createAuthenticationTokenHandler(writer http.ResponseWriter, request *http.Request) {
 	input := createAuthTokenRequest{}

@@ -1,18 +1,11 @@
-package main
+package config
 
 import (
-	"expvar"
 	"flag"
 	"fmt"
-	"github.com/jessicatarra/greenlight/internal/database"
-	"github.com/jessicatarra/greenlight/internal/jsonlog"
-	"github.com/jessicatarra/greenlight/internal/mailer"
 	"os"
-	"runtime"
 	"strconv"
 	"strings"
-	"sync"
-	"time"
 )
 
 var (
@@ -21,7 +14,7 @@ var (
 	env     string
 )
 
-type config struct {
+type Config struct {
 	port int
 	env  string
 	db   struct {
@@ -45,25 +38,8 @@ type config struct {
 	}
 }
 
-type application struct {
-	config config
-	logger *jsonlog.Logger
-	models database.Models
-	mailer mailer.Mailer
-	wg     sync.WaitGroup
-}
-
-// @title Greenlight API Docs
-// @version 1.0.0
-// @contact.name Jessica Tarra
-// @license.name Apache 2.0
-// @license.url http://www.apache.org/licenses/LICENSE-2.0.html
-// @BasePath /v1
-// @securityDefinitions.apikey ApiKeyAuth
-// @in header
-// @name Authorization
-func main() {
-	var cfg config
+func Init() (cfg *Config, err error) {
+	cfg = &Config{}
 
 	intPort, _ := strconv.Atoi(port)
 	flag.IntVar(&cfg.port, "port", intPort, "API server port")
@@ -97,39 +73,5 @@ func main() {
 		fmt.Printf("Version:\t%s\n", version)
 	}
 
-	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
-
-	db, err := database.New(cfg.db.dsn, cfg.db.maxOpenConns, cfg.db.maxIdleConns, cfg.db.maxIdleTime, true)
-	if err != nil {
-		logger.PrintFatal(err, nil)
-	}
-	defer db.Close()
-	logger.PrintInfo("database connection pool established", nil)
-
-	expvar.NewString("version").Set(version)
-
-	expvar.Publish("goroutines", expvar.Func(func() interface{} {
-		return runtime.NumGoroutine()
-	}))
-
-	expvar.Publish("database", expvar.Func(func() interface{} {
-		return db.Stats()
-	}))
-
-	expvar.Publish("timestamp", expvar.Func(func() interface{} {
-		return time.Now().Unix()
-	}))
-
-	app := &application{
-		config: cfg,
-		logger: logger,
-		models: database.NewModels(db),
-		mailer: mailer.New(cfg.smtp.host, cfg.smtp.port, cfg.smtp.username, cfg.smtp.password, cfg.smtp.sender),
-	}
-
-	err = app.serve(db)
-	if err != nil {
-		logger.PrintFatal(err, nil)
-		return
-	}
+	return cfg, nil
 }

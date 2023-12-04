@@ -1,6 +1,15 @@
 basePath: /v1
 definitions:
-  data.Movie:
+  app.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  database.Movie:
     properties:
       genres:
         items:
@@ -18,14 +27,27 @@ definitions:
       year:
         type: integer
     type: object
-  data.Token:
+  database.Token:
     properties:
       expiry:
         type: string
       token:
         type: string
     type: object
-  data.User:
+  database.User:
+    properties:
+      activated:
+        type: boolean
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entity.User:
     properties:
       activated:
         type: boolean
@@ -57,15 +79,6 @@ definitions:
         type: string
       year:
         type: integer
-    type: object
-  main.createUserRequest:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
     type: object
   main.updateMovieRequest:
     properties:
@@ -125,7 +138,7 @@ paths:
           description: Movie list
           schema:
             items:
-              $ref: '#/definitions/data.Movie'
+              $ref: '#/definitions/database.Movie'
             type: array
       security:
       - ApiKeyAuth: []
@@ -149,7 +162,7 @@ paths:
         "201":
           description: Movie created
           schema:
-            $ref: '#/definitions/data.Movie'
+            $ref: '#/definitions/database.Movie'
       security:
       - ApiKeyAuth: []
       summary: Create a movie
@@ -192,7 +205,7 @@ paths:
         "200":
           description: Movie details
           schema:
-            $ref: '#/definitions/data.Movie'
+            $ref: '#/definitions/database.Movie'
       security:
       - ApiKeyAuth: []
       summary: Get a movie by ID
@@ -220,7 +233,7 @@ paths:
         "200":
           description: Movie updated
           schema:
-            $ref: '#/definitions/data.Movie'
+            $ref: '#/definitions/database.Movie'
       security:
       - ApiKeyAuth: []
       summary: Update a movie by ID
@@ -244,7 +257,7 @@ paths:
         "201":
           description: Authentication token
           schema:
-            $ref: '#/definitions/data.Token'
+            $ref: '#/definitions/database.Token'
       summary: Create authentication token
       tags:
       - Authentication
@@ -259,14 +272,14 @@ paths:
         name: name
         required: true
         schema:
-          $ref: '#/definitions/main.createUserRequest'
+          $ref: '#/definitions/app.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/data.User'
+            $ref: '#/definitions/entity.User'
       summary: Register User
       tags:
       - Users
@@ -288,7 +301,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/data.User'
+            $ref: '#/definitions/database.User'
       summary: Activate User
       tags:
       - Users

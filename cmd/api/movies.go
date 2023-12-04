@@ -29,7 +29,7 @@ type updateMovieRequest struct {
 // @Produce json
 // @Security ApiKeyAuth
 // @Param request body createMovieRequest true "Request body"
-// @Success 201 {object} data.Movie "Movie created"
+// @Success 201 {object} database.Movie "Movie created"
 // @Router /movies [post]
 func (app *application) createMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	input := createMovieRequest{}
@@ -78,7 +78,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 // @Produce json
 // @Security ApiKeyAuth
 // @Param id path int true "Movie ID"
-// @Success 200 {object} data.Movie "Movie details"
+// @Success 200 {object} database.Movie "Movie details"
 // @Router /movies/{id} [get]
 func (app *application) showMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	id, err := app.readIDParam(request)
@@ -112,7 +112,7 @@ func (app *application) showMovieHandler(writer http.ResponseWriter, request *ht
 // @Security ApiKeyAuth
 // @Param id path int true "Movie ID"
 // @Param request body updateMovieRequest true "Request body"
-// @Success 200 {object} data.Movie "Movie updated"
+// @Success 200 {object} database.Movie "Movie updated"
 // @Router /movies/{id} [put]
 func (app *application) updateMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	id, err := app.readIDParam(request)
@@ -223,7 +223,7 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *
 // @Param page query int false "Page number"
 // @Param page_size query int false "Number of movies per page"
 // @Param sort query string false "Sort order"
-// @Success 200 {object} []data.Movie "Movie list"
+// @Success 200 {object} []database.Movie "Movie list"
 // @Router /movies [get]
 func (app *application) listMoviesHandler(writer http.ResponseWriter, request *http.Request) {
 	var input struct {

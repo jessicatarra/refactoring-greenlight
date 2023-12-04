@@ -1,16 +1,10 @@
 package app
 
 import (
-	"errors"
 	"github.com/jessicatarra/greenlight/internal/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
 	"github.com/jessicatarra/greenlight/ms/auth/repository"
-)
-
-var (
-	ErrEditConflict   = errors.New("edit conflict")
-	ErrRecordNotFound = errors.New("record not found")
-	ErrDuplicateEmail = errors.New("duplicate email")
+	"time"
 )
 
 func ValidateUser(v *validator.Validator, user *entity.User) {
@@ -40,14 +34,19 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 }
 
 type App interface {
-	Create(input CreateUserRequest) (entity.User, error)
+	Create(input CreateUserRequest) (*entity.User, error)
 }
 
 type app struct {
-	repo repository.Repository
+	userRepo  repository.UserRepository
+	tokenRepo repository.TokenRepository
 }
 
-func (a app) Create(input CreateUserRequest) (entity.User, error) {
+func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenRepository) App {
+	return &app{userRepo: userRepo, tokenRepo: tokenRepo}
+}
+
+func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 	user := &entity.User{Name: input.Name, Email: input.Email, Activated: false}
 
 	v := validator.New()
@@ -56,16 +55,23 @@ func (a app) Create(input CreateUserRequest) (entity.User, error) {
 
 	if !v.Valid() {
 		var err error
-		return entity.User{}, err
+		return nil, err
 	}
 
-	err := a.repo.InsertNewUser(user)
+	err := a.userRepo.InsertNewUser(user)
 
 	if err != nil {
-		return entity.User{}, err
+		return nil, err
 	}
 
-	return entity.User{}, err
+	token, err := a.tokenRepo.New(user.ID, 3*24*time.Hour, repository.ScopeActivation)
+	if err != nil {
+		return nil, err
+	}
+
+	print(token.Plaintext)
+
+	return user, err
 
 }
 

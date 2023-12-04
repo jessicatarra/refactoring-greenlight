@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"fmt"
 	"net/http"
@@ -11,10 +12,10 @@ import (
 	"time"
 )
 
-func (app *application) serve() error {
+func (app *application) serve(db *sql.DB) error {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", app.config.port),
-		Handler:      app.routes(),
+		Handler:      app.routes(db),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,

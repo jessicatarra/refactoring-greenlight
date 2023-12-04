@@ -49,7 +49,7 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) {
 	errorMessage(w, r, http.StatusBadRequest, err.Error(), nil)
 }
 
-func failedValidation(w http.ResponseWriter, r *http.Request, v validator.Validator) {
+func FailedValidation(w http.ResponseWriter, r *http.Request, v validator.Validator) {
 	err := response.JSON(w, http.StatusUnprocessableEntity, v)
 	if err != nil {
 		ServerError(w, r, err)
