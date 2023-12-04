@@ -31,10 +31,6 @@ type userRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) UserRepository {
-	return &userRepository{db: db}
-}
-
 func (r *userRepository) InsertNewUser(user *entity.User) error {
 	query := `
         INSERT INTO users (name, email, password_hash, activated) 

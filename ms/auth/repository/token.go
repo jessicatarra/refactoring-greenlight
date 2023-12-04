@@ -22,10 +22,6 @@ type tokenRepository struct {
 	db *sql.DB
 }
 
-func NewTokenRepo(db *sql.DB) TokenRepository {
-	return &tokenRepository{db: db}
-}
-
 func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
 	token, err := entity.GenerateToken(userID, ttl, scope)
 	if err != nil {
