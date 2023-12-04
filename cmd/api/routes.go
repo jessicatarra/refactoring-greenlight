@@ -5,7 +5,8 @@ import (
 	"expvar"
 	_ "github.com/jessicatarra/greenlight/docs"
 	_authApp "github.com/jessicatarra/greenlight/ms/auth/app"
-	_authRepo "github.com/jessicatarra/greenlight/ms/auth/repository"
+	_tokenRepo "github.com/jessicatarra/greenlight/ms/auth/repository"
+	_userRepo "github.com/jessicatarra/greenlight/ms/auth/repository"
 	_authService "github.com/jessicatarra/greenlight/ms/auth/service"
 	"github.com/julienschmidt/httprouter"
 	"github.com/justinas/alice"
@@ -28,7 +29,7 @@ func (app *application) routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.requirePermission("movies:write", app.updateMovieHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission("movies:write", app.deleteMovieHandler))
 
-	_authService.RegisterHandlers(_authApp.NewApp(_authRepo.NewRepository(db)), router)
+	_authService.RegisterHandlers(_authApp.NewApp(_userRepo.NewUserRepo(db), _tokenRepo.NewTokenRepo(db)), router)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 

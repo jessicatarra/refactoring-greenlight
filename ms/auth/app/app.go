@@ -38,11 +38,15 @@ type App interface {
 }
 
 type app struct {
-	authRepo repository.Repository
+	userRepo  repository.UserRepository
+	tokenRepo repository.TokenRepository
 }
 
-func NewApp(authRepo repository.Repository) App {
-	return &app{authRepo: authRepo}
+func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenRepository) App {
+	return &app{
+		userRepo:  userRepo,
+		tokenRepo: tokenRepo,
+	}
 }
 
 func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
@@ -62,21 +66,20 @@ func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 		return nil, err
 	}
 
-	err = a.authRepo.UserRepo.InsertNewUser(user)
+	err = a.userRepo.InsertNewUser(user)
 
 	if err != nil {
 		return nil, err
 	}
 
-	token, err := a.authRepo.TokenRepo.New(user.ID, 3*24*time.Hour, repository.ScopeActivation)
+	_, err = a.tokenRepo.New(user.ID, 3*24*time.Hour, repository.ScopeActivation)
 	if err != nil {
 		return nil, err
 	}
 
-	print(token.Plaintext)
+	//print(token.Plaintext)
 
 	return user, err
-
 }
 
 type CreateUserRequest struct {
