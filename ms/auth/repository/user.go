@@ -17,7 +17,7 @@ var (
 	ErrDuplicateEmail = errors.New("duplicate email")
 )
 
-const defaultTimeout = 3 * time.Second
+const defaultTimeout = 10 * time.Second
 
 type UserRepository interface {
 	InsertNewUser(user *entity.User) error
@@ -94,8 +94,7 @@ func (r *userRepository) GetUserByEmail(email string) (*entity.User, error) {
 
 func (r *userRepository) UpdateUser(user *entity.User) error {
 	query := `
-        UPDATE users 
-        SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
+        UPDATE users SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
         WHERE id = $5 AND version = $6
         RETURNING version`
 

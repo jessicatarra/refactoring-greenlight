@@ -42,7 +42,7 @@ type app struct {
 	tokenRepo repository.TokenRepository
 }
 
-func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenRepository) App {
+func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenRepository) *app {
 	return &app{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,

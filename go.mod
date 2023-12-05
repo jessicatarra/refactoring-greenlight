@@ -3,6 +3,7 @@ module github.com/jessicatarra/greenlight
 go 1.21.0
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.0
 	github.com/go-mail/mail/v2 v2.3.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/julienschmidt/httprouter v1.3.0
