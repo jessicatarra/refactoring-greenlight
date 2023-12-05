@@ -10,6 +10,10 @@ import (
 	"net/http"
 )
 
+type Resource interface {
+	create(res http.ResponseWriter, req *http.Request)
+}
+
 type resource struct {
 	app app.App
 }
@@ -40,6 +44,7 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 	user, err := r.app.Create(input)
 	if err != nil {
 		errors.ServerError(res, req, err)
+		return
 	}
 
 	err = response.JSON(res, http.StatusCreated, map[string]*entity.User{"user": user})
