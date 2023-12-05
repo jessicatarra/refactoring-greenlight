@@ -19,15 +19,16 @@ type TokenRepository interface {
 }
 
 type tokenRepository struct {
-	db *sql.DB
+	db    *sql.DB
+	token entity.TokenInterface
 }
 
 func NewTokenRepo(db *sql.DB) TokenRepository {
-	return &tokenRepository{db: db}
+	return &tokenRepository{db: db, token: entity.NewToken()}
 }
 
 func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
-	token, err := entity.GenerateToken(userID, ttl, scope)
+	token, err := t.token.GenerateToken(userID, ttl, scope)
 	if err != nil {
 		return nil, err
 	}
