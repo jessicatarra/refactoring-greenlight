@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/jessicatarra/greenlight/internal/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
-	"github.com/jessicatarra/greenlight/ms/auth/repository/mocks"
+	"github.com/jessicatarra/greenlight/ms/auth/repositories/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"testing"
@@ -45,11 +45,11 @@ func TestValidatePasswordPlaintext(t *testing.T) {
 }
 
 func TestCreate(t *testing.T) {
-	// Initialize the repository mock
+	// Initialize the repositories mock
 	userRepo := mocks.UserRepository{}
 	tokenRepo := mocks.TokenRepository{}
 
-	// Create the app instance with the repository mock
+	// Create the app instance with the repositories mock
 	app := NewApp(&userRepo, &tokenRepo)
 
 	// Prepare the input for the Create function
@@ -59,7 +59,7 @@ func TestCreate(t *testing.T) {
 		Password: "password123",
 	}
 
-	// Set the expectations on the user repository mock
+	// Set the expectations on the user repositories mock
 	userRepo.On("InsertNewUser", mock.AnythingOfType("*entity.User")).Return(nil)
 	tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 

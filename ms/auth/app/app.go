@@ -3,7 +3,7 @@ package app
 import (
 	"github.com/jessicatarra/greenlight/internal/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
-	"github.com/jessicatarra/greenlight/ms/auth/repository"
+	"github.com/jessicatarra/greenlight/ms/auth/repositories"
 	"time"
 )
 
@@ -38,11 +38,11 @@ type App interface {
 }
 
 type app struct {
-	userRepo  repository.UserRepository
-	tokenRepo repository.TokenRepository
+	userRepo  repositories.UserRepository
+	tokenRepo repositories.TokenRepository
 }
 
-func NewApp(userRepo repository.UserRepository, tokenRepo repository.TokenRepository) *app {
+func NewApp(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository) App {
 	return &app{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,
@@ -72,7 +72,7 @@ func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 		return nil, err
 	}
 
-	_, err = a.tokenRepo.New(user.ID, 3*24*time.Hour, repository.ScopeActivation)
+	_, err = a.tokenRepo.New(user.ID, 3*24*time.Hour, repositories.ScopeActivation)
 	if err != nil {
 		return nil, err
 	}
