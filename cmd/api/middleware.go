@@ -69,7 +69,7 @@ func (app *application) authenticate(next http.Handler) http.Handler {
 		}
 		token := headerParts[1]
 
-		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.jwt.secret))
+		claims, err := jwt.HMACCheck([]byte(token), []byte(app.config.Jwt.Secret))
 		if err != nil {
 			app.invalidAuthenticationTokenResponse(writer, request)
 			return
@@ -157,9 +157,9 @@ func (app *application) enableCORS(next http.Handler) http.Handler {
 
 		origin := request.Header.Get("Origin")
 
-		if origin != "" && len(app.config.cors.trustedOrigins) != 0 {
-			for i := range app.config.cors.trustedOrigins {
-				if origin == app.config.cors.trustedOrigins[i] {
+		if origin != "" && len(app.config.Cors.TrustedOrigins) != 0 {
+			for i := range app.config.Cors.TrustedOrigins {
+				if origin == app.config.Cors.TrustedOrigins[i] {
 					writer.Header().Set("Access-Control-Allow-Origin", origin)
 
 					if request.Method == http.MethodOptions && request.Header.Get("Access-Control-Request-Method") != "" {

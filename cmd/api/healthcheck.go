@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/jessicatarra/greenlight/internal/config"
 	"net/http"
 )
 
@@ -9,8 +10,8 @@ func (app *application) healthcheckHandler(writer http.ResponseWriter, request *
 		"status": "available",
 		"system_info": map[string]string{
 			"status":      "available",
-			"environment": app.config.env,
-			"version":     version,
+			"environment": app.config.Env,
+			"version":     config.Version,
 		},
 	}
 	err := app.writeJSON(writer, http.StatusOK, env, nil)

@@ -73,7 +73,7 @@ func (app *application) createAuthenticationTokenHandler(writer http.ResponseWri
 	claims.Audiences = []string{"greenlight.tarralva.com"}
 	claims.Audiences = []string{"greenlight.tarralva.com"}
 
-	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.jwt.secret))
+	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(app.config.Jwt.Secret))
 	if err != nil {
 		app.serverErrorResponse(writer, request, err)
 		return

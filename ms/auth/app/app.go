@@ -1,9 +1,14 @@
 package app
 
 import (
+	"github.com/jessicatarra/greenlight/internal/config"
+	"github.com/jessicatarra/greenlight/internal/helpers"
+	"github.com/jessicatarra/greenlight/internal/jsonlog"
+	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/internal/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
+	"sync"
 	"time"
 )
 
@@ -40,12 +45,21 @@ type App interface {
 type app struct {
 	userRepo  repositories.UserRepository
 	tokenRepo repositories.TokenRepository
+	helpers   helpers.Resource
+	logger    *jsonlog.Logger
+	wg        *sync.WaitGroup
+	mailer    mailer.Mailer
 }
 
-func NewApp(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository) App {
+func NewApp(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository, logger *jsonlog.Logger,
+	wg *sync.WaitGroup, cfg config.Config) App {
 	return &app{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,
+		helpers:   helpers.NewBackgroundTask(wg, logger),
+		logger:    logger,
+		wg:        wg,
+		mailer:    mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
 	}
 }
 
@@ -72,12 +86,25 @@ func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 		return nil, err
 	}
 
-	_, err = a.tokenRepo.New(user.ID, 3*24*time.Hour, repositories.ScopeActivation)
+	token, err := a.tokenRepo.New(user.ID, 3*24*time.Hour, repositories.ScopeActivation)
 	if err != nil {
 		return nil, err
 	}
 
-	//print(token.Plaintext)
+	fn := func() {
+		data := map[string]interface{}{
+			"activationToken": token.Plaintext,
+			"userID":          user.ID,
+		}
+		print(token.Plaintext)
+
+		err = a.mailer.Send(user.Email, "user_welcome.gohtml", data)
+		if err != nil {
+			a.logger.PrintError(err, nil)
+		}
+	}
+
+	a.helpers.Background(fn)
 
 	return user, err
 }

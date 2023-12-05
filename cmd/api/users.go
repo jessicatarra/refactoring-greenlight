@@ -7,12 +7,6 @@ import (
 	"net/http"
 )
 
-type createUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 // @Summary Activate User
 // @Description Activates a user account using a token that was previously sent when successfully register a new user
 // @Tags Users
