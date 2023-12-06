@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestValidateUser(t *testing.T) {
+func TestApp_ValidateUser(t *testing.T) {
 	v := validator.New()
 
 	password := "password123!"
@@ -32,7 +32,7 @@ func TestValidateUser(t *testing.T) {
 	assert.True(t, v.Valid())
 }
 
-func TestValidateEmail(t *testing.T) {
+func TestApp_ValidateEmail(t *testing.T) {
 	v := validator.New()
 	email := "john@example.com"
 
@@ -41,7 +41,7 @@ func TestValidateEmail(t *testing.T) {
 	assert.True(t, v.Valid())
 }
 
-func TestValidatePasswordPlaintext(t *testing.T) {
+func TestApp_ValidatePasswordPlaintext(t *testing.T) {
 	v := validator.New()
 	password := "password123"
 
@@ -50,7 +50,7 @@ func TestValidatePasswordPlaintext(t *testing.T) {
 	assert.True(t, v.Valid())
 }
 
-func TestCreate(t *testing.T) {
+func TestApp_Create(t *testing.T) {
 	// Initialize the repositories mock
 	userRepo := mocks.UserRepository{}
 	tokenRepo := mocks.TokenRepository{}

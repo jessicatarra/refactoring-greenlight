@@ -16,7 +16,7 @@ import (
 	"testing"
 )
 
-func TestCreateUser(t *testing.T) {
+func TestResource_CreateUser(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		//Arrange

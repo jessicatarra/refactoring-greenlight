@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func TestInsertNewUser(t *testing.T) {
+func TestUserRepository_InsertNewUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()
@@ -64,7 +64,7 @@ func TestInsertNewUser(t *testing.T) {
 	})
 }
 
-func TestGetUserByEmail(t *testing.T) {
+func TestUserRepository_GetUserByEmail(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()
@@ -108,7 +108,7 @@ func TestGetUserByEmail(t *testing.T) {
 	})
 }
 
-func TestUpdateUser(t *testing.T) {
+func TestUserRepository_UpdateUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()
@@ -162,7 +162,7 @@ func TestUpdateUser(t *testing.T) {
 	})
 }
 
-func TestGetUserById(t *testing.T) {
+func TestUserRepository_GetUserById(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()

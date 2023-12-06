@@ -1,65 +1,87 @@
 package repositories
 
 import (
+	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/entity/mocks"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
 )
 
-//func TestTokenRepository_New(t *testing.T) {
-//	db, mock, err := sqlmock.New()
-//	assert.NoError(t, err)
-//	defer db.Close()
-//
-//	mockTokenInterface := mocks.NewTokenInterface(t)
-//
-//	repo := NewTokenRepo(db)
-//
-//	// Test cases
-//	t.Run("Success", func(t *testing.T) {
-//		// Arrange
-//		userID := int64(1)
-//		ttl := 1 * time.Hour
-//		scope := ScopeActivation
-//
-//		hash := []byte("sampleHash")
-//		token := &entity.Token{
-//			Hash:   hash,
-//			UserID: userID,
-//			Expiry: time.Now().Add(ttl),
-//			Scope:  scope,
-//		}
-//		mockTokenInterface.On("GenerateToken", userID, ttl, scope).Return(token, nil)
-//
-//		// Act
-//		newToken, err := repo.New(userID, ttl, scope)
-//
-//		// Assert
-//		assert.NoError(t, err)
-//		assert.NotNil(t, newToken)
-//		//assert.Equal(t, hash, newToken.Hash)
-//	})
-//
-//	t.Run("Error", func(t *testing.T) {
-//		// Arrange
-//		userID := int64(1)
-//		ttl := 1 * time.Hour
-//		scope := ScopeActivation
-//
-//		mock.ExpectExec("INSERT INTO tokens").
-//			WithArgs(sqlmock.AnyArg(), userID, sqlmock.AnyArg(), scope).
-//			WillReturnError(sqlmock.ErrCancelled)
-//
-//		// Act
-//		newToken, err := repo.New(userID, ttl, scope)
-//
-//		// Assert
-//		assert.Error(t, err)
-//		assert.Nil(t, newToken)
-//	})
-//}
+func TestTokenRepository_New(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	mockTokenInterface := mocks.TokenInterface{}
+
+	repo := &tokenRepository{
+		db:    db,
+		token: &mockTokenInterface,
+	}
+
+	// Test cases
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		userID := int64(1)
+		ttl := 1 * time.Hour
+		scope := ScopeActivation
+
+		expectedToken := &entity.Token{
+			Plaintext: "mock_token",
+			Hash:      []byte("mock_hash"),
+			UserID:    userID,
+			Expiry:    time.Now().Add(ttl),
+			Scope:     scope,
+		}
+		mock.ExpectExec("INSERT INTO tokens").
+			WithArgs(sqlmock.AnyArg(), userID, sqlmock.AnyArg(), scope).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+		mockTokenInterface.On("GenerateToken", userID, ttl, scope).Return(expectedToken, nil)
+
+		// Act
+		newToken, err := repo.New(userID, ttl, scope)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, newToken)
+		assert.Equal(t, expectedToken, newToken)
+	})
+}
+
+func TestTokenRepository_NewError(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	mockTokenInterface := mocks.TokenInterface{}
+
+	repo := &tokenRepository{
+		db:    db,
+		token: &mockTokenInterface,
+	}
+
+	t.Run("Error", func(t *testing.T) {
+		// Arrange
+		userID := int64(1)
+		ttl := 1 * time.Hour
+		scope := ScopeActivation
+
+		mock.ExpectExec("INSERT INTO tokens").
+			WithArgs(sqlmock.AnyArg(), userID, ttl, scope).
+			WillReturnError(sqlmock.ErrCancelled)
+		mockTokenInterface.On("GenerateToken", userID, ttl, scope).Return(nil, errors.New("some error"))
+
+		// Act
+		newToken, err := repo.New(userID, ttl, scope)
+
+		// Assert
+		assert.Error(t, err)
+		assert.Nil(t, newToken)
+	})
+}
 
 func TestTokenRepository_Insert(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -72,7 +94,7 @@ func TestTokenRepository_Insert(t *testing.T) {
 	// Test cases
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
-		token := &entity.Token{
+		expectedToken := &entity.Token{
 			Hash:   hash,
 			UserID: 1,
 			Expiry: time.Now().Add(1 * time.Hour),
@@ -80,15 +102,14 @@ func TestTokenRepository_Insert(t *testing.T) {
 		}
 
 		mock.ExpectExec("INSERT INTO tokens").
-			WithArgs(token.Hash, token.UserID, token.Expiry, token.Scope).
+			WithArgs(expectedToken.Hash, expectedToken.UserID, expectedToken.Expiry, expectedToken.Scope).
 			WillReturnResult(sqlmock.NewResult(1, 1))
 
 		// Act
-		err := repo.Insert(token)
+		err := repo.Insert(expectedToken)
 
 		// Assert
 		assert.NoError(t, err)
-		// Add additional assertions if necessary
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -109,7 +130,6 @@ func TestTokenRepository_Insert(t *testing.T) {
 
 		// Assert
 		assert.Error(t, err)
-		// Add additional assertions if necessary
 	})
 }
 
@@ -135,7 +155,6 @@ func TestTokenRepository_DeleteAllForUser(t *testing.T) {
 
 		// Assert
 		assert.NoError(t, err)
-		// Add additional assertions if necessary
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -152,11 +171,10 @@ func TestTokenRepository_DeleteAllForUser(t *testing.T) {
 
 		// Assert
 		assert.Error(t, err)
-		// Add additional assertions if necessary
 	})
 }
 
-func TestUserRepository_GetUserById(t *testing.T) {
+func TestTokenRepository_GetUserById(t *testing.T) {
 	db, mock, err := sqlmock.New()
 	assert.NoError(t, err)
 	defer db.Close()
@@ -181,7 +199,6 @@ func TestUserRepository_GetUserById(t *testing.T) {
 		// Assert
 		assert.NoError(t, err)
 		assert.NotNil(t, user)
-		// Add additional assertions if necessary
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -198,6 +215,5 @@ func TestUserRepository_GetUserById(t *testing.T) {
 		// Assert
 		assert.Error(t, err)
 		assert.Nil(t, user)
-		// Add additional assertions if necessary
 	})
 }
