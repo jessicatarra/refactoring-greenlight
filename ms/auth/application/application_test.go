@@ -4,9 +4,9 @@
 package application
 
 import (
+	"errors"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
-	"github.com/jessicatarra/greenlight/internal/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/stretchr/testify/assert"
@@ -15,43 +15,7 @@ import (
 	"testing"
 )
 
-func TestApp_ValidateUser(t *testing.T) {
-	v := validator.New()
-
-	password := "password123!"
-	hash := []byte("sampleHash")
-
-	user := &domain.User{
-		Name:     "John Doe",
-		Email:    "john@example.com",
-		Password: domain.Password{Plaintext: &password, Hash: hash},
-	}
-
-	ValidateUser(v, user)
-
-	assert.True(t, v.Valid())
-}
-
-func TestApp_ValidateEmail(t *testing.T) {
-	v := validator.New()
-	email := "john@example.com"
-
-	ValidateEmail(v, email)
-
-	assert.True(t, v.Valid())
-}
-
-func TestApp_ValidatePasswordPlaintext(t *testing.T) {
-	v := validator.New()
-	password := "password123"
-
-	ValidatePasswordPlaintext(v, password)
-
-	assert.True(t, v.Valid())
-}
-
-func TestApp_Create(t *testing.T) {
-	// Initialize the repositories mock
+func Init() (mocks.UserRepository, mocks.TokenRepository, *jsonlog.Logger, *sync.WaitGroup, config.Config) {
 	userRepo := mocks.UserRepository{}
 	tokenRepo := mocks.TokenRepository{}
 	logger := &jsonlog.Logger{}
@@ -71,6 +35,12 @@ func TestApp_Create(t *testing.T) {
 			Sender:   "Greenlight <no-reply@tarralva.com>",
 		},
 	}
+	return userRepo, tokenRepo, logger, wg, cfg
+}
+
+func TestApp_CreateUseCase(t *testing.T) {
+	// Initialize the repositories mock
+	userRepo, tokenRepo, logger, wg, cfg := Init()
 
 	// CreateUseCase the application instance with the repositories mock
 	app := NewAppl(&userRepo, &tokenRepo, logger, wg, cfg)
@@ -91,4 +61,29 @@ func TestApp_Create(t *testing.T) {
 	// Assert the results
 	assert.NotNil(t, user)
 	assert.NoError(t, err)
+}
+
+func TestApp_GetByEmailUseCase(t *testing.T) {
+	// Initialize the repositories mock
+	userRepo, tokenRepo, logger, wg, cfg := Init()
+
+	// CreateUseCase the application instance with the repositories mock
+	app := NewAppl(&userRepo, &tokenRepo, logger, wg, cfg)
+
+	// Prepare the input for the CreateUseCase function
+	input := domain.CreateUserRequest{
+		Name:     "Sarah Foo",
+		Email:    "sarah@example.com",
+		Password: "password123",
+	}
+
+	userRepo.On("GetUserByEmail", mock.AnythingOfType("string")).Return(nil, errors.New("record not found"))
+	tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
+
+	// Call the CreateUseCase function
+	user, err := app.GetByEmailUseCase(input)
+
+	// Assert the results
+	assert.Error(t, err)
+	assert.Nil(t, user)
 }

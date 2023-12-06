@@ -2,6 +2,7 @@ package errors
 
 import (
 	"github.com/jessicatarra/greenlight/internal/response"
+	"github.com/jessicatarra/greenlight/internal/utils"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -47,13 +48,13 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) {
 	errorMessage(w, r, http.StatusBadRequest, err.Error(), nil)
 }
 
-//func FailedValidation(w http.ResponseWriter, r *http.Request, v validator.Validator) {
-//	err := response.JSON(w, http.StatusUnprocessableEntity, v)
-//	if err != nil {
-//		ServerError(w, r, err)
-//	}
-//}
-//
+func FailedValidation(w http.ResponseWriter, r *http.Request, v utils.Validator) {
+	err := response.JSON(w, http.StatusUnprocessableEntity, v)
+	if err != nil {
+		ServerError(w, r, err)
+	}
+}
+
 //func invalidAuthenticationToken(w http.ResponseWriter, r *http.Request) {
 //	headers := make(http.Header)
 //	headers.Set("WWW-Authenticate", "Bearer")
@@ -64,6 +65,7 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) {
 //func authenticationRequired(w http.ResponseWriter, r *http.Request) {
 //	errorMessage(w, r, http.StatusUnauthorized, "You must be authenticated to access this resource", nil)
 //}
+
 //
 //func basicAuthenticationRequired(w http.ResponseWriter, r *http.Request) {
 //	headers := make(http.Header)

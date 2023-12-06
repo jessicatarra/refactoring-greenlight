@@ -29,7 +29,7 @@ func (app *application) routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission("movies:write", app.deleteMovieHandler))
 
 	_authService.RegisterHandlers(_authApp.NewAppl(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), app.logger, &app.wg, app.config), router)
-	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
+	//router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 
 	router.Handler(http.MethodGet, "/v1/metrics", expvar.Handler())

@@ -15,7 +15,7 @@ import (
 	"testing"
 )
 
-func TestResource_CreateUser(t *testing.T) {
+func TestResource_Create(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		//Arrange
@@ -51,6 +51,7 @@ func TestResource_CreateUser(t *testing.T) {
 		}
 
 		mockApp.On("CreateUseCase", expectedInput).Return(expectedUser, nil)
+		mockApp.On("GetByEmailUseCase", expectedInput).Return(nil, errors.New("record not found"))
 
 		// Act
 		res.create(resRec, req)
@@ -116,6 +117,7 @@ func TestResource_CreateUser(t *testing.T) {
 		expectedErr := errors.New("The server encountered a problem and could not process your request")
 
 		mockApp.On("CreateUseCase", expectedInput).Return(nil, expectedErr)
+		mockApp.On("GetByEmailUseCase", expectedInput).Return(nil, errors.New("record not found"))
 
 		//Act
 		res.create(resRec, req)

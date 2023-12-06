@@ -1,6 +1,9 @@
 package domain
 
-import "time"
+import (
+	"github.com/jessicatarra/greenlight/internal/utils"
+	"time"
+)
 
 type User struct {
 	ID        int64     `json:"id"`
@@ -13,13 +16,16 @@ type User struct {
 }
 
 type CreateUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name      string          `json:"name"`
+	Email     string          `json:"email"`
+	Password  string          `json:"password"`
+	Validator utils.Validator `json:"-"`
 }
 
 type Appl interface {
 	CreateUseCase(input CreateUserRequest) (*User, error)
+	ActivateUseCase(tokenPlainText string) (*User, error)
+	GetByEmailUseCase(input CreateUserRequest) (*User, error)
 }
 
 type UserRepository interface {

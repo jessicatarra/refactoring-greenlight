@@ -12,12 +12,72 @@ type Appl struct {
 	mock.Mock
 }
 
+// ActivateUseCase provides a mock function with given fields: tokenPlainText
+func (_m *Appl) ActivateUseCase(tokenPlainText string) (*domain.User, error) {
+	ret := _m.Called(tokenPlainText)
+
+	if len(ret) == 0 {
+		panic("no return value specified for ActivateUseCase")
+	}
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*domain.User, error)); ok {
+		return rf(tokenPlainText)
+	}
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
+		r0 = rf(tokenPlainText)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(tokenPlainText)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateUseCase provides a mock function with given fields: input
 func (_m *Appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, error) {
 	ret := _m.Called(input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateUseCase")
+	}
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) (*domain.User, error)); ok {
+		return rf(input)
+	}
+	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) *domain.User); ok {
+		r0 = rf(input)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(domain.CreateUserRequest) error); ok {
+		r1 = rf(input)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetByEmailUseCase provides a mock function with given fields: input
+func (_m *Appl) GetByEmailUseCase(input domain.CreateUserRequest) (*domain.User, error) {
+	ret := _m.Called(input)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByEmailUseCase")
 	}
 
 	var r0 *domain.User

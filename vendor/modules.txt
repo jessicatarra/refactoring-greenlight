@@ -86,6 +86,9 @@ go.uber.org/atomic
 ## explicit; go 1.17
 golang.org/x/crypto/bcrypt
 golang.org/x/crypto/blowfish
+# golang.org/x/exp v0.0.0-20230315142452-642cacee5cc0
+## explicit; go 1.18
+golang.org/x/exp/constraints
 # golang.org/x/net v0.10.0
 ## explicit; go 1.17
 golang.org/x/net/webdav
