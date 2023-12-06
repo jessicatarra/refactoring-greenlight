@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"time"
 )
 
@@ -12,22 +12,16 @@ const (
 	ScopeAuthentication = "authentication"
 )
 
-type TokenRepository interface {
-	New(userID int64, ttl time.Duration, scope string) (*entity.Token, error)
-	Insert(token *entity.Token) error
-	DeleteAllForUser(scope string, userID int64) error
-}
-
 type tokenRepository struct {
 	db    *sql.DB
-	token entity.TokenInterface
+	token domain.TokenInterface
 }
 
-func NewTokenRepo(db *sql.DB) TokenRepository {
-	return &tokenRepository{db: db, token: entity.NewToken()}
+func NewTokenRepo(db *sql.DB) domain.TokenRepository {
+	return &tokenRepository{db: db, token: domain.NewToken()}
 }
 
-func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
+func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*domain.Token, error) {
 	token, err := t.token.GenerateToken(userID, ttl, scope)
 	if err != nil {
 		return nil, err
@@ -37,7 +31,7 @@ func (t *tokenRepository) New(userID int64, ttl time.Duration, scope string) (*e
 	return token, err
 }
 
-func (t *tokenRepository) Insert(token *entity.Token) error {
+func (t *tokenRepository) Insert(token *domain.Token) error {
 	query := `
         INSERT INTO tokens (hash, user_id, expiry, scope) 
         VALUES ($1, $2, $3, $4)`

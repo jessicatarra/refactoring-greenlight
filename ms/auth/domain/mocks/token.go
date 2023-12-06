@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	entity "github.com/jessicatarra/greenlight/ms/auth/entity"
+	domain "github.com/jessicatarra/greenlight/ms/auth/domain"
 	mock "github.com/stretchr/testify/mock"
 
 	time "time"
@@ -15,23 +15,23 @@ type TokenInterface struct {
 }
 
 // GenerateToken provides a mock function with given fields: userID, ttl, scope
-func (_m *TokenInterface) GenerateToken(userID int64, ttl time.Duration, scope string) (*entity.Token, error) {
+func (_m *TokenInterface) GenerateToken(userID int64, ttl time.Duration, scope string) (*domain.Token, error) {
 	ret := _m.Called(userID, ttl, scope)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GenerateToken")
 	}
 
-	var r0 *entity.Token
+	var r0 *domain.Token
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64, time.Duration, string) (*entity.Token, error)); ok {
+	if rf, ok := ret.Get(0).(func(int64, time.Duration, string) (*domain.Token, error)); ok {
 		return rf(userID, ttl, scope)
 	}
-	if rf, ok := ret.Get(0).(func(int64, time.Duration, string) *entity.Token); ok {
+	if rf, ok := ret.Get(0).(func(int64, time.Duration, string) *domain.Token); ok {
 		r0 = rf(userID, ttl, scope)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.Token)
+			r0 = ret.Get(0).(*domain.Token)
 		}
 	}
 

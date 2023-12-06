@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	entity "github.com/jessicatarra/greenlight/ms/auth/entity"
+	domain "github.com/jessicatarra/greenlight/ms/auth/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,27 +13,27 @@ type Appl struct {
 }
 
 // CreateUseCase provides a mock function with given fields: input
-func (_m *Appl) CreateUseCase(input entity.CreateUserRequest) (*entity.User, error) {
+func (_m *Appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, error) {
 	ret := _m.Called(input)
 
 	if len(ret) == 0 {
 		panic("no return value specified for CreateUseCase")
 	}
 
-	var r0 *entity.User
+	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(entity.CreateUserRequest) (*entity.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) (*domain.User, error)); ok {
 		return rf(input)
 	}
-	if rf, ok := ret.Get(0).(func(entity.CreateUserRequest) *entity.User); ok {
+	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) *domain.User); ok {
 		r0 = rf(input)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(entity.CreateUserRequest) error); ok {
+	if rf, ok := ret.Get(1).(func(domain.CreateUserRequest) error); ok {
 		r1 = rf(input)
 	} else {
 		r1 = ret.Error(1)

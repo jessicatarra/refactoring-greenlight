@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	_ "github.com/lib/pq"
 	"time"
 )
@@ -19,23 +19,15 @@ var (
 
 const defaultTimeout = 10 * time.Second
 
-type UserRepository interface {
-	InsertNewUser(user *entity.User) error
-	GetUserByEmail(email string) (*entity.User, error)
-	UpdateUser(user *entity.User) error
-	GetForToken(tokenScope string, tokenPlaintext string) (*entity.User, error)
-	GetUserById(id int64) (*entity.User, error)
-}
-
 type userRepository struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) UserRepository {
+func NewUserRepo(db *sql.DB) domain.UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) InsertNewUser(user *entity.User) error {
+func (r *userRepository) InsertNewUser(user *domain.User) error {
 	query := `
         INSERT INTO users (name, email, password_hash, activated) 
         VALUES ($1, $2, $3, $4)
@@ -59,13 +51,13 @@ func (r *userRepository) InsertNewUser(user *entity.User) error {
 	return nil
 }
 
-func (r *userRepository) GetUserByEmail(email string) (*entity.User, error) {
+func (r *userRepository) GetUserByEmail(email string) (*domain.User, error) {
 	query := `
         SELECT id, created_at, name, email, password_hash, activated, version
         FROM users
         WHERE email = $1`
 
-	var user entity.User
+	var user domain.User
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
@@ -92,7 +84,7 @@ func (r *userRepository) GetUserByEmail(email string) (*entity.User, error) {
 	return &user, nil
 }
 
-func (r *userRepository) UpdateUser(user *entity.User) error {
+func (r *userRepository) UpdateUser(user *domain.User) error {
 	query := `
         UPDATE users SET name = $1, email = $2, password_hash = $3, activated = $4, version = version + 1
         WHERE id = $5 AND version = $6
@@ -125,7 +117,7 @@ func (r *userRepository) UpdateUser(user *entity.User) error {
 	return nil
 }
 
-func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (*entity.User, error) {
+func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (*domain.User, error) {
 	tokenHash := sha256.Sum256([]byte(tokenPlaintext))
 
 	query := `
@@ -139,7 +131,7 @@ func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (
 
 	args := []interface{}{tokenHash[:], tokenScope, time.Now()}
 
-	var user entity.User
+	var user domain.User
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
@@ -165,13 +157,13 @@ func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (
 	return &user, nil
 }
 
-func (r *userRepository) GetUserById(id int64) (*entity.User, error) {
+func (r *userRepository) GetUserById(id int64) (*domain.User, error) {
 	query := `
         SELECT id, created_at, name, email, password_hash, activated, version
         FROM users
         WHERE id = $1`
 
-	var user entity.User
+	var user domain.User
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()

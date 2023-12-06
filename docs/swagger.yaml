@@ -38,7 +38,7 @@ definitions:
       name:
         type: string
     type: object
-  entity.CreateUserRequest:
+  domain.CreateUserRequest:
     properties:
       email:
         type: string
@@ -47,7 +47,7 @@ definitions:
       password:
         type: string
     type: object
-  entity.User:
+  domain.User:
     properties:
       activated:
         type: boolean
@@ -272,14 +272,14 @@ paths:
         name: name
         required: true
         schema:
-          $ref: '#/definitions/entity.CreateUserRequest'
+          $ref: '#/definitions/domain.CreateUserRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Created
           schema:
-            $ref: '#/definitions/entity.User'
+            $ref: '#/definitions/domain.User'
       summary: Register User
       tags:
       - Users

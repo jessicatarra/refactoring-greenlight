@@ -3,8 +3,8 @@ package repositories
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
-	"github.com/jessicatarra/greenlight/ms/auth/entity/mocks"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -29,7 +29,7 @@ func TestTokenRepository_New(t *testing.T) {
 		ttl := 1 * time.Hour
 		scope := ScopeActivation
 
-		expectedToken := &entity.Token{
+		expectedToken := &domain.Token{
 			Plaintext: "mock_token",
 			Hash:      []byte("mock_hash"),
 			UserID:    userID,
@@ -94,7 +94,7 @@ func TestTokenRepository_Insert(t *testing.T) {
 	// Test cases
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
-		expectedToken := &entity.Token{
+		expectedToken := &domain.Token{
 			Hash:   hash,
 			UserID: 1,
 			Expiry: time.Now().Add(1 * time.Hour),
@@ -114,7 +114,7 @@ func TestTokenRepository_Insert(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
-		token := &entity.Token{
+		token := &domain.Token{
 			Hash:   hash,
 			UserID: 1,
 			Expiry: time.Now().Add(1 * time.Hour),

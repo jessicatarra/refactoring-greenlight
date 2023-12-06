@@ -1,4 +1,4 @@
-package entity
+package domain
 
 import "time"
 
@@ -16,4 +16,16 @@ type CreateUserRequest struct {
 	Name     string `json:"name"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type Appl interface {
+	CreateUseCase(input CreateUserRequest) (*User, error)
+}
+
+type UserRepository interface {
+	InsertNewUser(user *User) error
+	GetUserByEmail(email string) (*User, error)
+	UpdateUser(user *User) error
+	GetForToken(tokenScope string, tokenPlaintext string) (*User, error)
+	GetUserById(id int64) (*User, error)
 }

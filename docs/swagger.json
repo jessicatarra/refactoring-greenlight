@@ -284,7 +284,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.CreateUserRequest"
+                            "$ref": "#/definitions/domain.CreateUserRequest"
                         }
                     }
                 ],
@@ -292,7 +292,7 @@
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/entity.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     }
                 }
@@ -390,7 +390,7 @@
                 }
             }
         },
-        "entity.CreateUserRequest": {
+        "domain.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -404,7 +404,7 @@
                 }
             }
         },
-        "entity.User": {
+        "domain.User": {
             "type": "object",
             "properties": {
                 "activated": {

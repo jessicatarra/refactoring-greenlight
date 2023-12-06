@@ -7,8 +7,8 @@ import (
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/validator"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
-	"github.com/jessicatarra/greenlight/ms/auth/repositories/mocks"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"sync"
@@ -21,10 +21,10 @@ func TestApp_ValidateUser(t *testing.T) {
 	password := "password123!"
 	hash := []byte("sampleHash")
 
-	user := &entity.User{
+	user := &domain.User{
 		Name:     "John Doe",
 		Email:    "john@example.com",
-		Password: entity.Password{Plaintext: &password, Hash: hash},
+		Password: domain.Password{Plaintext: &password, Hash: hash},
 	}
 
 	ValidateUser(v, user)
@@ -76,13 +76,13 @@ func TestApp_Create(t *testing.T) {
 	app := NewAppl(&userRepo, &tokenRepo, logger, wg, cfg)
 
 	// Prepare the input for the CreateUseCase function
-	input := entity.CreateUserRequest{
+	input := domain.CreateUserRequest{
 		Name:     "John Doe",
 		Email:    "john@example.com",
 		Password: "password123",
 	}
 
-	userRepo.On("InsertNewUser", mock.AnythingOfType("*entity.User")).Return(nil)
+	userRepo.On("InsertNewUser", mock.AnythingOfType("*domain.User")).Return(nil)
 	tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 	// Call the CreateUseCase function

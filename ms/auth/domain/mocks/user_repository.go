@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	entity "github.com/jessicatarra/greenlight/ms/auth/entity"
+	domain "github.com/jessicatarra/greenlight/ms/auth/domain"
 	mock "github.com/stretchr/testify/mock"
 )
 
@@ -13,23 +13,23 @@ type UserRepository struct {
 }
 
 // GetForToken provides a mock function with given fields: tokenScope, tokenPlaintext
-func (_m *UserRepository) GetForToken(tokenScope string, tokenPlaintext string) (*entity.User, error) {
+func (_m *UserRepository) GetForToken(tokenScope string, tokenPlaintext string) (*domain.User, error) {
 	ret := _m.Called(tokenScope, tokenPlaintext)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetForToken")
 	}
 
-	var r0 *entity.User
+	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string, string) (*entity.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(string, string) (*domain.User, error)); ok {
 		return rf(tokenScope, tokenPlaintext)
 	}
-	if rf, ok := ret.Get(0).(func(string, string) *entity.User); ok {
+	if rf, ok := ret.Get(0).(func(string, string) *domain.User); ok {
 		r0 = rf(tokenScope, tokenPlaintext)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -43,23 +43,23 @@ func (_m *UserRepository) GetForToken(tokenScope string, tokenPlaintext string) 
 }
 
 // GetUserByEmail provides a mock function with given fields: email
-func (_m *UserRepository) GetUserByEmail(email string) (*entity.User, error) {
+func (_m *UserRepository) GetUserByEmail(email string) (*domain.User, error) {
 	ret := _m.Called(email)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetUserByEmail")
 	}
 
-	var r0 *entity.User
+	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(string) (*entity.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(string) (*domain.User, error)); ok {
 		return rf(email)
 	}
-	if rf, ok := ret.Get(0).(func(string) *entity.User); ok {
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
 		r0 = rf(email)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -73,23 +73,23 @@ func (_m *UserRepository) GetUserByEmail(email string) (*entity.User, error) {
 }
 
 // GetUserById provides a mock function with given fields: id
-func (_m *UserRepository) GetUserById(id int64) (*entity.User, error) {
+func (_m *UserRepository) GetUserById(id int64) (*domain.User, error) {
 	ret := _m.Called(id)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetUserById")
 	}
 
-	var r0 *entity.User
+	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(int64) (*entity.User, error)); ok {
+	if rf, ok := ret.Get(0).(func(int64) (*domain.User, error)); ok {
 		return rf(id)
 	}
-	if rf, ok := ret.Get(0).(func(int64) *entity.User); ok {
+	if rf, ok := ret.Get(0).(func(int64) *domain.User); ok {
 		r0 = rf(id)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*entity.User)
+			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
@@ -103,7 +103,7 @@ func (_m *UserRepository) GetUserById(id int64) (*entity.User, error) {
 }
 
 // InsertNewUser provides a mock function with given fields: user
-func (_m *UserRepository) InsertNewUser(user *entity.User) error {
+func (_m *UserRepository) InsertNewUser(user *domain.User) error {
 	ret := _m.Called(user)
 
 	if len(ret) == 0 {
@@ -111,7 +111,7 @@ func (_m *UserRepository) InsertNewUser(user *entity.User) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.User) error); ok {
+	if rf, ok := ret.Get(0).(func(*domain.User) error); ok {
 		r0 = rf(user)
 	} else {
 		r0 = ret.Error(0)
@@ -121,7 +121,7 @@ func (_m *UserRepository) InsertNewUser(user *entity.User) error {
 }
 
 // UpdateUser provides a mock function with given fields: user
-func (_m *UserRepository) UpdateUser(user *entity.User) error {
+func (_m *UserRepository) UpdateUser(user *domain.User) error {
 	ret := _m.Called(user)
 
 	if len(ret) == 0 {
@@ -129,7 +129,7 @@ func (_m *UserRepository) UpdateUser(user *entity.User) error {
 	}
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*entity.User) error); ok {
+	if rf, ok := ret.Get(0).(func(*domain.User) error); ok {
 		r0 = rf(user)
 	} else {
 		r0 = ret.Error(0)

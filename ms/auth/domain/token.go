@@ -1,4 +1,4 @@
-package entity
+package domain
 
 import (
 	"crypto/rand"
@@ -9,6 +9,12 @@ import (
 
 type TokenInterface interface {
 	GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error)
+}
+
+type TokenRepository interface {
+	New(userID int64, ttl time.Duration, scope string) (*Token, error)
+	Insert(token *Token) error
+	DeleteAllForUser(scope string, userID int64) error
 }
 
 type token struct{}

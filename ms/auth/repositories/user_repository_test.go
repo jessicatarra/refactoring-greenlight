@@ -6,7 +6,7 @@ package repositories
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
@@ -23,10 +23,10 @@ func TestUserRepository_InsertNewUser(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
-		user := &entity.User{
+		user := &domain.User{
 			Name:      "John Doe",
 			Email:     "johndoe@example.com",
-			Password:  entity.Password{Hash: hash},
+			Password:  domain.Password{Hash: hash},
 			Activated: true,
 		}
 
@@ -45,10 +45,10 @@ func TestUserRepository_InsertNewUser(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
-		user := &entity.User{
+		user := &domain.User{
 			Name:      "John Doe",
 			Email:     "johndoe@example.com",
-			Password:  entity.Password{Hash: hash},
+			Password:  domain.Password{Hash: hash},
 			Activated: true,
 		}
 
@@ -118,11 +118,11 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
-		user := &entity.User{
+		user := &domain.User{
 			ID:        1,
 			Name:      "John Doe",
 			Email:     "johndoe@example.com",
-			Password:  entity.Password{Hash: hash},
+			Password:  domain.Password{Hash: hash},
 			Activated: true,
 			Version:   1,
 		}
@@ -141,11 +141,11 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
-		user := &entity.User{
+		user := &domain.User{
 			ID:        1,
 			Name:      "John Doe",
 			Email:     "johndoe@example.com",
-			Password:  entity.Password{Hash: hash},
+			Password:  domain.Password{Hash: hash},
 			Activated: true,
 			Version:   1,
 		}

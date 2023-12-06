@@ -6,13 +6,13 @@ import (
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/internal/validator"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
 	"sync"
 	"time"
 )
 
-func ValidateUser(v *validator.Validator, user *entity.User) {
+func ValidateUser(v *validator.Validator, user *domain.User) {
 	v.Check(user.Name != "", "name", "must be provided")
 	v.Check(len(user.Name) <= 500, "name", "must not be more than 500 bytes long")
 
@@ -38,21 +38,17 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
 }
 
-type Appl interface {
-	CreateUseCase(input entity.CreateUserRequest) (*entity.User, error)
-}
-
 type appl struct {
-	userRepo  repositories.UserRepository
-	tokenRepo repositories.TokenRepository
+	userRepo  domain.UserRepository
+	tokenRepo domain.TokenRepository
 	helpers   helpers.Resource
 	logger    *jsonlog.Logger
 	wg        *sync.WaitGroup
 	mailer    mailer.Mailer
 }
 
-func NewAppl(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository, logger *jsonlog.Logger,
-	wg *sync.WaitGroup, cfg config.Config) Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, logger *jsonlog.Logger,
+	wg *sync.WaitGroup, cfg config.Config) domain.Appl {
 	return &appl{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,
@@ -63,8 +59,8 @@ func NewAppl(userRepo repositories.UserRepository, tokenRepo repositories.TokenR
 	}
 }
 
-func (a *appl) CreateUseCase(input entity.CreateUserRequest) (*entity.User, error) {
-	user := &entity.User{Name: input.Name, Email: input.Email, Activated: false}
+func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, error) {
+	user := &domain.User{Name: input.Name, Email: input.Email, Activated: false}
 
 	err := user.Password.Set(input.Password)
 	if err != nil {

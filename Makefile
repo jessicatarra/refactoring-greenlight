@@ -41,10 +41,13 @@ generate/api/docs:
 
 .PHONY: generate/auth/mocks
 generate/auth/mocks:
-	mockery --name=Appl --filename=application.go --output=ms/auth/application/mocks --dir=ms/auth/application
-	mockery --name=TokenInterface --filename=token.go --output=ms/auth/entity/mocks --dir=ms/auth/entity
-	mockery --name=TokenRepository --filename=token_repository.go --output=ms/auth/repositories/mocks --dir=ms/auth/repositories
-	mockery --name=UserRepository --filename=user_repository.go --output=ms/auth/repositories/mocks --dir=ms/auth/repositories
+	@echo 'Remove mocks...'
+	rm -rf ms/auth/domain/mocks
+	@echo 'Generate updated mocks...'
+	mockery --name=Appl --filename=user_application.go --output=ms/auth/domain/mocks --dir=ms/auth/domain
+	mockery --name=TokenInterface --filename=token.go --output=ms/auth/domain/mocks --dir=ms/auth/domain
+	mockery --name=TokenRepository --filename=token_repository.go --output=ms/auth/domain/mocks --dir=ms/auth/domain
+	mockery --name=UserRepository --filename=user_repository.go --output=ms/auth/domain/mocks --dir=ms/auth/domain
 
 
 # ====================================================================================

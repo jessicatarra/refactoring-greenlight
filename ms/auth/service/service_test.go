@@ -7,8 +7,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/jessicatarra/greenlight/ms/auth/application/mocks"
-	"github.com/jessicatarra/greenlight/ms/auth/entity"
+	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 	"net/http/httptest"
@@ -38,13 +38,13 @@ func TestResource_CreateUser(t *testing.T) {
 
 		resRec := httptest.NewRecorder()
 
-		expectedInput := entity.CreateUserRequest{
+		expectedInput := domain.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",
 		}
 
-		expectedUser := &entity.User{
+		expectedUser := &domain.User{
 			ID:    1,
 			Name:  "John Doe",
 			Email: "johndoe@example.com",
@@ -60,7 +60,7 @@ func TestResource_CreateUser(t *testing.T) {
 			t.Errorf("unexpected status code: got %d, want %d", resRec.Code, http.StatusCreated)
 		}
 
-		var responseBody map[string]*entity.User
+		var responseBody map[string]*domain.User
 		err := json.Unmarshal(resRec.Body.Bytes(), &responseBody)
 		if err != nil {
 			t.Errorf("failed to parse response body: %s", err)
@@ -69,7 +69,7 @@ func TestResource_CreateUser(t *testing.T) {
 		if responseBody["user"] == nil {
 			t.Errorf("expected 'user' field in response body, got nil")
 		} else {
-			// Check the user entity fields
+			// Check the user domain fields
 			if responseBody["user"].ID != expectedUser.ID {
 				t.Errorf("unexpected user ID: got %d, want %d", responseBody["user"].ID, expectedUser.ID)
 			}
@@ -107,7 +107,7 @@ func TestResource_CreateUser(t *testing.T) {
 
 		resRec := httptest.NewRecorder()
 
-		expectedInput := entity.CreateUserRequest{
+		expectedInput := domain.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",

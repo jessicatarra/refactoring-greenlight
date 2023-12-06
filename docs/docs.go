@@ -292,7 +292,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/entity.CreateUserRequest"
+                            "$ref": "#/definitions/domain.CreateUserRequest"
                         }
                     }
                 ],
@@ -300,7 +300,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Created",
                         "schema": {
-                            "$ref": "#/definitions/entity.User"
+                            "$ref": "#/definitions/domain.User"
                         }
                     }
                 }
@@ -398,7 +398,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.CreateUserRequest": {
+        "domain.CreateUserRequest": {
             "type": "object",
             "properties": {
                 "email": {
@@ -412,7 +412,7 @@ const docTemplate = `{
                 }
             }
         },
-        "entity.User": {
+        "domain.User": {
             "type": "object",
             "properties": {
                 "activated": {
