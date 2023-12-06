@@ -7,16 +7,6 @@ import (
 	"time"
 )
 
-type TokenInterface interface {
-	GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error)
-}
-
-type TokenRepository interface {
-	New(userID int64, ttl time.Duration, scope string) (*Token, error)
-	Insert(token *Token) error
-	DeleteAllForUser(scope string, userID int64) error
-}
-
 type token struct{}
 
 func NewToken() TokenInterface {
@@ -51,4 +41,14 @@ func (t *token) GenerateToken(userID int64, ttl time.Duration, scope string) (*T
 	token.Hash = hash[:]
 
 	return token, nil
+}
+
+type TokenInterface interface {
+	GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error)
+}
+
+type TokenRepository interface {
+	New(userID int64, ttl time.Duration, scope string) (*Token, error)
+	Insert(token *Token) error
+	DeleteAllForUser(scope string, userID int64) error
 }
