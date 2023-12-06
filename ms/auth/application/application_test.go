@@ -1,7 +1,7 @@
 //go:build integration
 // +build integration
 
-package app
+package application
 
 import (
 	"github.com/jessicatarra/greenlight/internal/config"
@@ -72,11 +72,11 @@ func TestApp_Create(t *testing.T) {
 		},
 	}
 
-	// Create the app instance with the repositories mock
-	app := NewApp(&userRepo, &tokenRepo, logger, wg, cfg)
+	// CreateUseCase the application instance with the repositories mock
+	app := NewAppl(&userRepo, &tokenRepo, logger, wg, cfg)
 
-	// Prepare the input for the Create function
-	input := CreateUserRequest{
+	// Prepare the input for the CreateUseCase function
+	input := entity.CreateUserRequest{
 		Name:     "John Doe",
 		Email:    "john@example.com",
 		Password: "password123",
@@ -85,8 +85,8 @@ func TestApp_Create(t *testing.T) {
 	userRepo.On("InsertNewUser", mock.AnythingOfType("*entity.User")).Return(nil)
 	tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
-	// Call the Create function
-	user, err := app.Create(input)
+	// Call the CreateUseCase function
+	user, err := app.CreateUseCase(input)
 
 	// Assert the results
 	assert.NotNil(t, user)

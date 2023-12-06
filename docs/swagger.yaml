@@ -1,14 +1,5 @@
 basePath: /v1
 definitions:
-  app.CreateUserRequest:
-    properties:
-      email:
-        type: string
-      name:
-        type: string
-      password:
-        type: string
-    type: object
   database.Movie:
     properties:
       genres:
@@ -45,6 +36,15 @@ definitions:
       id:
         type: integer
       name:
+        type: string
+    type: object
+  entity.CreateUserRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
         type: string
     type: object
   entity.User:
@@ -258,7 +258,7 @@ paths:
           description: Authentication token
           schema:
             $ref: '#/definitions/database.Token'
-      summary: Create authentication token
+      summary: CreateUseCase authentication token
       tags:
       - Authentication
   /users:
@@ -272,7 +272,7 @@ paths:
         name: name
         required: true
         schema:
-          $ref: '#/definitions/app.CreateUserRequest'
+          $ref: '#/definitions/entity.CreateUserRequest'
       produces:
       - application/json
       responses:

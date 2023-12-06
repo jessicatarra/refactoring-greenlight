@@ -7,14 +7,6 @@ import (
 	"time"
 )
 
-type Token struct {
-	Plaintext string    `json:"token"`
-	Hash      []byte    `json:"-"`
-	UserID    int64     `json:"-"`
-	Expiry    time.Time `json:"expiry"`
-	Scope     string    `json:"-"`
-}
-
 type TokenInterface interface {
 	GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error)
 }
@@ -23,6 +15,14 @@ type token struct{}
 
 func NewToken() TokenInterface {
 	return &token{}
+}
+
+type Token struct {
+	Plaintext string    `json:"token"`
+	Hash      []byte    `json:"-"`
+	UserID    int64     `json:"-"`
+	Expiry    time.Time `json:"expiry"`
+	Scope     string    `json:"-"`
 }
 
 func (t *token) GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {

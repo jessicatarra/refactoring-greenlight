@@ -38,6 +38,15 @@ generate/api/docs:
 	@echo 'Generate updated docs folder'
 	swag init -d cmd/api,ms/auth/service --parseDependency --parseInternal --parseDepth 2
 
+
+.PHONY: generate/auth/mocks
+generate/auth/mocks:
+	mockery --name=Appl --filename=application.go --output=ms/auth/application/mocks --dir=ms/auth/application
+	mockery --name=TokenInterface --filename=token.go --output=ms/auth/entity/mocks --dir=ms/auth/entity
+	mockery --name=TokenRepository --filename=token_repository.go --output=ms/auth/repositories/mocks --dir=ms/auth/repositories
+	mockery --name=UserRepository --filename=user_repository.go --output=ms/auth/repositories/mocks --dir=ms/auth/repositories
+
+
 # ====================================================================================
 # # BUILD
 # ==================================================================================== #

@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"expvar"
 	_ "github.com/jessicatarra/greenlight/docs"
-	_authApp "github.com/jessicatarra/greenlight/ms/auth/app"
+	_authApp "github.com/jessicatarra/greenlight/ms/auth/application"
 	_authRepo "github.com/jessicatarra/greenlight/ms/auth/repositories"
 	_authService "github.com/jessicatarra/greenlight/ms/auth/service"
 	"github.com/julienschmidt/httprouter"
@@ -28,7 +28,7 @@ func (app *application) routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.requirePermission("movies:write", app.updateMovieHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission("movies:write", app.deleteMovieHandler))
 
-	_authService.RegisterHandlers(_authApp.NewApp(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), app.logger, &app.wg, app.config), router)
+	_authService.RegisterHandlers(_authApp.NewAppl(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), app.logger, &app.wg, app.config), router)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
 

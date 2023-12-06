@@ -250,7 +250,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "Create authentication token",
+                "summary": "CreateUseCase authentication token",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -292,7 +292,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/app.CreateUserRequest"
+                            "$ref": "#/definitions/entity.CreateUserRequest"
                         }
                     }
                 ],
@@ -340,20 +340,6 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "app.CreateUserRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "name": {
-                    "type": "string"
-                },
-                "password": {
-                    "type": "string"
-                }
-            }
-        },
         "database.Movie": {
             "type": "object",
             "properties": {
@@ -408,6 +394,20 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
+                    "type": "string"
+                }
+            }
+        },
+        "entity.CreateUserRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "name": {
+                    "type": "string"
+                },
+                "password": {
                     "type": "string"
                 }
             }

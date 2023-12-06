@@ -4,7 +4,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
-	"github.com/jessicatarra/greenlight/ms/auth/app"
+	"github.com/jessicatarra/greenlight/ms/auth/application"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -12,14 +12,15 @@ import (
 
 type Resource interface {
 	create(res http.ResponseWriter, req *http.Request)
+	activate(res http.ResponseWriter, req *http.Request)
 }
 
 type resource struct {
-	app app.App
+	appl application.Appl
 }
 
-func RegisterHandlers(app app.App, router *httprouter.Router) {
-	res := &resource{app}
+func RegisterHandlers(appl application.Appl, router *httprouter.Router) {
+	res := &resource{appl}
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.create)
 }
@@ -29,11 +30,11 @@ func RegisterHandlers(app app.App, router *httprouter.Router) {
 // @Tags Users
 // @Accept json
 // @Produce  json
-// @Param name body app.CreateUserRequest true "User registration data"
+// @Param name body entity.CreateUserRequest true "User registration data"
 // @Success 201 {object} entity.User
 // @Router /users [post]
 func (r *resource) create(res http.ResponseWriter, req *http.Request) {
-	var input app.CreateUserRequest
+	var input entity.CreateUserRequest
 
 	err := request.DecodeJSON(res, req, &input)
 	if err != nil {
@@ -41,7 +42,7 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := r.app.Create(input)
+	user, err := r.appl.CreateUseCase(input)
 	if err != nil {
 		errors.ServerError(res, req, err)
 		return
@@ -51,4 +52,8 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		errors.ServerError(res, req, err)
 	}
+}
+
+func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
+
 }

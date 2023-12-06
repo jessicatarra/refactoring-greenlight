@@ -15,7 +15,7 @@ type createAuthTokenRequest struct {
 	Password string `json:"password"`
 }
 
-// @Summary Create authentication token
+// @Summary CreateUseCase authentication token
 // @Description Creates an authentication token for a user
 // @Tags Authentication
 // @Accept json

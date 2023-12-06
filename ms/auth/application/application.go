@@ -1,4 +1,4 @@
-package app
+package application
 
 import (
 	"github.com/jessicatarra/greenlight/internal/config"
@@ -38,11 +38,11 @@ func ValidatePasswordPlaintext(v *validator.Validator, password string) {
 	v.Check(len(password) <= 72, "password", "must not be more than 72 bytes long")
 }
 
-type App interface {
-	Create(input CreateUserRequest) (*entity.User, error)
+type Appl interface {
+	CreateUseCase(input entity.CreateUserRequest) (*entity.User, error)
 }
 
-type app struct {
+type appl struct {
 	userRepo  repositories.UserRepository
 	tokenRepo repositories.TokenRepository
 	helpers   helpers.Resource
@@ -51,9 +51,9 @@ type app struct {
 	mailer    mailer.Mailer
 }
 
-func NewApp(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository, logger *jsonlog.Logger,
-	wg *sync.WaitGroup, cfg config.Config) App {
-	return &app{
+func NewAppl(userRepo repositories.UserRepository, tokenRepo repositories.TokenRepository, logger *jsonlog.Logger,
+	wg *sync.WaitGroup, cfg config.Config) Appl {
+	return &appl{
 		userRepo:  userRepo,
 		tokenRepo: tokenRepo,
 		helpers:   helpers.NewBackgroundTask(wg, logger),
@@ -63,7 +63,7 @@ func NewApp(userRepo repositories.UserRepository, tokenRepo repositories.TokenRe
 	}
 }
 
-func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
+func (a *appl) CreateUseCase(input entity.CreateUserRequest) (*entity.User, error) {
 	user := &entity.User{Name: input.Name, Email: input.Email, Activated: false}
 
 	err := user.Password.Set(input.Password)
@@ -107,10 +107,4 @@ func (a *app) Create(input CreateUserRequest) (*entity.User, error) {
 	a.helpers.Background(fn)
 
 	return user, err
-}
-
-type CreateUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
 }

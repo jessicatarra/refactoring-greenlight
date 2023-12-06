@@ -7,8 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/jessicatarra/greenlight/ms/auth/app"
-	"github.com/jessicatarra/greenlight/ms/auth/app/mocks"
+	"github.com/jessicatarra/greenlight/ms/auth/application/mocks"
 	"github.com/jessicatarra/greenlight/ms/auth/entity"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -22,9 +21,9 @@ func TestResource_CreateUser(t *testing.T) {
 		//Arrange
 		router := httprouter.New()
 
-		mockApp := &mocks.App{}
+		mockApp := &mocks.Appl{}
 
-		res := resource{app: mockApp}
+		res := resource{appl: mockApp}
 
 		RegisterHandlers(mockApp, router)
 
@@ -39,7 +38,7 @@ func TestResource_CreateUser(t *testing.T) {
 
 		resRec := httptest.NewRecorder()
 
-		expectedInput := app.CreateUserRequest{
+		expectedInput := entity.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",
@@ -51,7 +50,7 @@ func TestResource_CreateUser(t *testing.T) {
 			Email: "johndoe@example.com",
 		}
 
-		mockApp.On("Create", expectedInput).Return(expectedUser, nil)
+		mockApp.On("CreateUseCase", expectedInput).Return(expectedUser, nil)
 
 		// Act
 		res.create(resRec, req)
@@ -84,16 +83,16 @@ func TestResource_CreateUser(t *testing.T) {
 			}
 		}
 
-		mockApp.AssertCalled(t, "Create", expectedInput)
+		mockApp.AssertCalled(t, "CreateUseCase", expectedInput)
 	})
 
 	t.Run("error", func(t *testing.T) {
 		//Arrange
 		router := httprouter.New()
 
-		mockApp := &mocks.App{}
+		mockApp := &mocks.Appl{}
 
-		res := resource{app: mockApp}
+		res := resource{appl: mockApp}
 
 		RegisterHandlers(mockApp, router)
 
@@ -108,7 +107,7 @@ func TestResource_CreateUser(t *testing.T) {
 
 		resRec := httptest.NewRecorder()
 
-		expectedInput := app.CreateUserRequest{
+		expectedInput := entity.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",
@@ -116,7 +115,7 @@ func TestResource_CreateUser(t *testing.T) {
 
 		expectedErr := errors.New("The server encountered a problem and could not process your request")
 
-		mockApp.On("Create", expectedInput).Return(nil, expectedErr)
+		mockApp.On("CreateUseCase", expectedInput).Return(nil, expectedErr)
 
 		//Act
 		res.create(resRec, req)
@@ -140,6 +139,6 @@ func TestResource_CreateUser(t *testing.T) {
 			}
 		}
 
-		mockApp.AssertCalled(t, "Create", expectedInput)
+		mockApp.AssertCalled(t, "CreateUseCase", expectedInput)
 	})
 }
