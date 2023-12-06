@@ -12,23 +12,23 @@ import (
 )
 
 type appl struct {
-	userRepo  domain.UserRepository
-	tokenRepo domain.TokenRepository
-	helpers   concurrent.Resource
-	logger    *jsonlog.Logger
-	wg        *sync.WaitGroup
-	mailer    mailer.Mailer
+	userRepo   domain.UserRepository
+	tokenRepo  domain.TokenRepository
+	concurrent concurrent.Resource
+	logger     *jsonlog.Logger
+	wg         *sync.WaitGroup
+	mailer     mailer.Mailer
 }
 
 func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, logger *jsonlog.Logger,
 	wg *sync.WaitGroup, cfg config.Config) domain.Appl {
 	return &appl{
-		userRepo:  userRepo,
-		tokenRepo: tokenRepo,
-		helpers:   concurrent.NewBackgroundTask(wg, logger),
-		logger:    logger,
-		wg:        wg,
-		mailer:    mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
+		userRepo:   userRepo,
+		tokenRepo:  tokenRepo,
+		concurrent: concurrent.NewBackgroundTask(wg, logger),
+		logger:     logger,
+		wg:         wg,
+		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
 	}
 }
 
@@ -59,7 +59,7 @@ func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, erro
 		}
 	}
 
-	a.helpers.Background(fn)
+	a.concurrent.BackgroundTask(fn)
 
 	return user, err
 }

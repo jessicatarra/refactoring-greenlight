@@ -7,7 +7,7 @@ import (
 )
 
 type Resource interface {
-	Background(fn func())
+	BackgroundTask(fn func())
 }
 
 type resource struct {
@@ -22,7 +22,7 @@ func NewBackgroundTask(wg *sync.WaitGroup, logger *jsonlog.Logger) Resource {
 	}
 }
 
-func (r *resource) Background(fn func()) {
+func (r *resource) BackgroundTask(fn func()) {
 	r.wg.Add(1)
 
 	go func() {
