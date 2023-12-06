@@ -305,38 +305,6 @@ const docTemplate = `{
                     }
                 }
             }
-        },
-        "/users/activated": {
-            "put": {
-                "description": "Activates a user account using a token that was previously sent when successfully register a new user",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Users"
-                ],
-                "summary": "Activate User",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Token for user activation",
-                        "name": "token",
-                        "in": "query",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "$ref": "#/definitions/database.User"
-                        }
-                    }
-                }
-            }
         }
     },
     "definitions": {
@@ -374,26 +342,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "token": {
-                    "type": "string"
-                }
-            }
-        },
-        "database.User": {
-            "type": "object",
-            "properties": {
-                "activated": {
-                    "type": "boolean"
-                },
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "name": {
                     "type": "string"
                 }
             }

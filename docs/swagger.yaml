@@ -25,19 +25,6 @@ definitions:
       token:
         type: string
     type: object
-  database.User:
-    properties:
-      activated:
-        type: boolean
-      created_at:
-        type: string
-      email:
-        type: string
-      id:
-        type: integer
-      name:
-        type: string
-    type: object
   domain.CreateUserRequest:
     properties:
       email:
@@ -281,28 +268,6 @@ paths:
           schema:
             $ref: '#/definitions/domain.User'
       summary: Register User
-      tags:
-      - Users
-  /users/activated:
-    put:
-      consumes:
-      - application/json
-      description: Activates a user account using a token that was previously sent
-        when successfully register a new user
-      parameters:
-      - description: Token for user activation
-        in: query
-        name: token
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/database.User'
-      summary: Activate User
       tags:
       - Users
 securityDefinitions:
