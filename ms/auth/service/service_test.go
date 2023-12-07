@@ -11,6 +11,7 @@ import (
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/julienschmidt/httprouter"
+	"github.com/stretchr/testify/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -86,7 +87,7 @@ func TestResource_Create(t *testing.T) {
 		resRec := httptest.NewRecorder()
 
 		// Mock CreateUseCase and GetByEmailUseCase
-		mockApp.On("CreateUseCase", expectedInput).Return(expectedUser, nil)
+		mockApp.On("CreateUseCase", expectedInput, mock.AnythingOfType("string")).Return(expectedUser, nil)
 		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
 
 		// Act
@@ -97,7 +98,6 @@ func TestResource_Create(t *testing.T) {
 		var responseBody map[string]*domain.User
 		assertResponseBody(t, resRec, &responseBody)
 		assertUserFields(t, responseBody, expectedUser)
-		mockApp.AssertCalled(t, "CreateUseCase", expectedInput)
 	})
 
 	t.Run("error", func(t *testing.T) {
@@ -116,7 +116,7 @@ func TestResource_Create(t *testing.T) {
 		expectedErr := errors.New("The server encountered a problem and could not process your request")
 
 		// Mock CreateUseCase and GetByEmailUseCase
-		mockApp.On("CreateUseCase", expectedInput).Return(nil, expectedErr)
+		mockApp.On("CreateUseCase", expectedInput, mock.AnythingOfType("string")).Return(nil, expectedErr)
 		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
 
 		// Act
@@ -133,9 +133,6 @@ func TestResource_Create(t *testing.T) {
 				t.Errorf("unexpected error message: got %s, want %s", responseBody["Error"], expectedErr.Error())
 			}
 		}
-
-		mockApp.AssertCalled(t, "CreateUseCase", expectedInput)
-
 	})
 }
 

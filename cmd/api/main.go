@@ -62,7 +62,7 @@ func main() {
 		config: cfg,
 		logger: logger,
 		models: database.NewModels(db),
-		mailer: mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
+		mailer: mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
 	}
 
 	err = app.serve(db)

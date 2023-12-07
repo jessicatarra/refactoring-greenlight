@@ -21,13 +21,13 @@ func NewUserRepo(db *sql.DB) domain.UserRepository {
 	return &userRepository{db: db}
 }
 
-func (r *userRepository) InsertNewUser(user *domain.User) error {
+func (r *userRepository) InsertNewUser(user *domain.User, hashedPassword string) error {
 	query := `
         INSERT INTO users (name, email, password_hash, activated) 
         VALUES ($1, $2, $3, $4)
         RETURNING id, created_at, version`
 
-	args := []interface{}{user.Name, user.Email, user.Password.Hash, user.Activated}
+	args := []interface{}{user.Name, user.Email, hashedPassword, user.Activated}
 
 	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
@@ -61,7 +61,7 @@ func (r *userRepository) GetUserByEmail(email string) (*domain.User, error) {
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password.Hash,
+		&user.HashedPassword,
 		&user.Activated,
 		&user.Version,
 	)
@@ -87,7 +87,7 @@ func (r *userRepository) UpdateUser(user *domain.User) error {
 	args := []interface{}{
 		user.Name,
 		user.Email,
-		user.Password.Hash,
+		user.HashedPassword,
 		user.Activated,
 		user.ID,
 		user.Version,
@@ -135,7 +135,7 @@ func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password.Hash,
+		&user.HashedPassword,
 		&user.Activated,
 		&user.Version,
 	)
@@ -167,7 +167,7 @@ func (r *userRepository) GetUserById(id int64) (*domain.User, error) {
 		&user.CreatedAt,
 		&user.Name,
 		&user.Email,
-		&user.Password.Hash,
+		&user.HashedPassword,
 		&user.Activated,
 		&user.Version,
 	)

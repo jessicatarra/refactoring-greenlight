@@ -25,6 +25,13 @@ definitions:
       token:
         type: string
     type: object
+  domain.CreateAuthTokenRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
   domain.CreateUserRequest:
     properties:
       email:
@@ -32,6 +39,13 @@ definitions:
       name:
         type: string
       password:
+        type: string
+    type: object
+  domain.Token:
+    properties:
+      expiry:
+        type: string
+      token:
         type: string
     type: object
   domain.User:
@@ -237,15 +251,15 @@ paths:
         name: request
         required: true
         schema:
-          $ref: '#/definitions/main.createAuthTokenRequest'
+          $ref: '#/definitions/domain.CreateAuthTokenRequest'
       produces:
       - application/json
       responses:
         "201":
           description: Authentication token
           schema:
-            $ref: '#/definitions/database.Token'
-      summary: CreateUseCase authentication token
+            $ref: '#/definitions/domain.Token'
+      summary: Create authentication token
       tags:
       - Authentication
   /users:

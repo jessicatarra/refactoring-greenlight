@@ -6,6 +6,7 @@ package application
 import (
 	"errors"
 	"github.com/jessicatarra/greenlight/internal/config"
+	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
@@ -23,13 +24,13 @@ func Init() (mocks.UserRepository, mocks.TokenRepository, config.Config) {
 			Port     int
 			Username string
 			Password string
-			Sender   string
+			From     string
 		}{
 			Host:     "sandbox.smtp.mailtrap.io",
 			Port:     25,
 			Username: "username",
 			Password: "password",
-			Sender:   "Greenlight <no-reply@tarralva.com>",
+			From:     "Greenlight <no-reply@tarralva.com>",
 		},
 	}
 	return userRepo, tokenRepo, cfg
@@ -50,13 +51,14 @@ func TestApp_CreateUseCase(t *testing.T) {
 			Email:    "john@example.com",
 			Password: "password123",
 		}
+		hashedPassword, _ := password.Hash(input.Password)
 
 		// Set up the success step
-		userRepo.On("InsertNewUser", mock.AnythingOfType("*domain.User")).Return(nil)
+		userRepo.On("InsertNewUser", mock.AnythingOfType("*domain.User"), mock.AnythingOfType("string")).Return(nil)
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the CreateUseCase function
-		user, err := app.CreateUseCase(input)
+		user, err := app.CreateUseCase(input, hashedPassword)
 
 		// Assert the results
 		assert.NotNil(t, user)
@@ -76,13 +78,14 @@ func TestApp_CreateUseCase(t *testing.T) {
 			Email:    "john@example.com",
 			Password: "password123",
 		}
+		hashedPassword, _ := password.Hash(input.Password)
 
 		// Set up the error step
-		userRepo.On("InsertNewUser", mock.AnythingOfType("*domain.User")).Return(errors.New("failed to insert user"))
+		userRepo.On("InsertNewUser", mock.AnythingOfType("*domain.User"), mock.AnythingOfType("string")).Return(errors.New("failed to insert user"))
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the CreateUseCase function again
-		user, err := app.CreateUseCase(input)
+		user, err := app.CreateUseCase(input, hashedPassword)
 
 		// Assert the error step
 		assert.Nil(t, user)

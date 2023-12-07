@@ -6,13 +6,13 @@ import (
 )
 
 type User struct {
-	ID        int64     `json:"id"`
-	CreatedAt time.Time `json:"created_at"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Password  Password  `json:"-"`
-	Activated bool      `json:"activated"`
-	Version   int       `json:"-"`
+	ID             int64     `json:"id"`
+	CreatedAt      time.Time `json:"created_at"`
+	Name           string    `json:"name"`
+	Email          string    `json:"email"`
+	HashedPassword string    `json:"-"`
+	Activated      bool      `json:"activated"`
+	Version        int       `json:"-"`
 }
 
 type CreateUserRequest struct {
@@ -23,13 +23,14 @@ type CreateUserRequest struct {
 }
 
 type Appl interface {
-	CreateUseCase(input CreateUserRequest) (*User, error)
+	CreateUseCase(input CreateUserRequest, hashedPassword string) (*User, error)
 	ActivateUseCase(tokenPlainText string) (*User, error)
 	GetByEmailUseCase(email string) (*User, error)
+	CreateAuthTokenUseCase(userID int64) ([]byte, error)
 }
 
 type UserRepository interface {
-	InsertNewUser(user *User) error
+	InsertNewUser(user *User, hashedPassword string) error
 	GetUserByEmail(email string) (*User, error)
 	UpdateUser(user *User) error
 	GetForToken(tokenScope string, tokenPlaintext string) (*User, error)

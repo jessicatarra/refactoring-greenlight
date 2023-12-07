@@ -6,6 +6,8 @@ import (
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
+	"github.com/pascaldekloe/jwt"
+	"strconv"
 	"time"
 )
 
@@ -14,6 +16,7 @@ type appl struct {
 	tokenRepo  domain.TokenRepository
 	concurrent concurrent.Resource
 	mailer     mailer.Mailer
+	cfg        config.Config
 }
 
 func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, cfg config.Config) domain.Appl {
@@ -21,19 +24,15 @@ func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, c
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,
 		concurrent: concurrent.NewBackgroundTask(),
-		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
+		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
+		cfg:        cfg,
 	}
 }
 
-func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, error) {
+func (a *appl) CreateUseCase(input domain.CreateUserRequest, hashedPassword string) (*domain.User, error) {
 	user := &domain.User{Name: input.Name, Email: input.Email, Activated: false}
 
-	err := user.Password.Set(input.Password)
-	if err != nil {
-		return nil, err
-	}
-
-	err = a.userRepo.InsertNewUser(user)
+	err := a.userRepo.InsertNewUser(user, hashedPassword)
 
 	if err != nil {
 		return nil, err
@@ -91,4 +90,21 @@ func (a *appl) GetByEmailUseCase(email string) (*domain.User, error) {
 	}
 
 	return existingUser, nil
+}
+
+func (a *appl) CreateAuthTokenUseCase(userID int64) ([]byte, error) {
+	var claims jwt.Claims
+	claims.Subject = strconv.FormatInt(userID, 10)
+	claims.Issued = jwt.NewNumericTime(time.Now())
+	claims.NotBefore = jwt.NewNumericTime(time.Now())
+	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
+	claims.Issuer = a.cfg.BaseURL
+	claims.Audiences = []string{a.cfg.BaseURL}
+
+	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(a.cfg.Jwt.Secret))
+	if err != nil {
+		return nil, err
+	}
+
+	return jwtBytes, nil
 }

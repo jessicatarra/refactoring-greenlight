@@ -27,3 +27,18 @@ func ValidateEmail(input domain.CreateUserRequest, existingUser *domain.User) {
 	input.Validator.CheckField(validator.Matches(input.Email, validator.RgxEmail), "Email", "Must be a valid email address")
 	input.Validator.CheckField(existingUser == nil, "Email", "Email is already in use")
 }
+
+func ValidateToken(input domain.ActivateUserRequest) {
+	input.Validator.Check(input.TokenPlaintext != "", "token must be provided")
+	input.Validator.Check(len(input.TokenPlaintext) == 26, "token must be 26 bytes long")
+}
+
+func ValidateEmailForAuth(input domain.CreateAuthTokenRequest, existingUser *domain.User) {
+	input.Validator.CheckField(input.Email != "", "Email", "Email is required")
+	input.Validator.CheckField(existingUser != nil, "Email", "Email address could not be found")
+}
+
+func ValidatePasswordForAuth(input domain.CreateAuthTokenRequest, passwordMatches bool) {
+	input.Validator.CheckField(input.Password != "", "Password", "Password is required")
+	input.Validator.CheckField(passwordMatches, "Password", "Password is incorrect")
+}

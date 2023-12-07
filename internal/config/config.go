@@ -15,9 +15,10 @@ var (
 )
 
 type Config struct {
-	Port int
-	Env  string
-	DB   struct {
+	BaseURL string
+	Port    int
+	Env     string
+	DB      struct {
 		Dsn          string
 		MaxOpenConns int
 		MaxIdleConns int
@@ -28,7 +29,7 @@ type Config struct {
 		Port     int
 		Username string
 		Password string
-		Sender   string
+		From     string
 	}
 	Cors struct {
 		TrustedOrigins []string
@@ -40,6 +41,8 @@ type Config struct {
 
 func Init() (cfg Config, err error) {
 	intPort, _ := strconv.Atoi(port)
+
+	flag.StringVar(&cfg.BaseURL, "base-url", os.Getenv("BASE_URL"), "base URL for the application")
 	flag.IntVar(&cfg.Port, "port", intPort, "API server port")
 	flag.StringVar(&cfg.Env, "env", env, "Environment (development|staging|production)")
 	flag.StringVar(&cfg.DB.Dsn, "db-dsn", os.Getenv(
@@ -54,7 +57,7 @@ func Init() (cfg Config, err error) {
 	flag.IntVar(&cfg.Smtp.Port, "smtp-port", smtpPort, "SMTP port")
 	flag.StringVar(&cfg.Smtp.Username, "smtp-username", os.Getenv("SMTP_USERNAME"), "SMTP username")
 	flag.StringVar(&cfg.Smtp.Password, "smtp-password", os.Getenv("SMTP_PASSWORD"), "SMTP password")
-	flag.StringVar(&cfg.Smtp.Sender, "smtp-sender", os.Getenv("SMTP_SENDER"), "SMTP sender")
+	flag.StringVar(&cfg.Smtp.From, "smtp-sender", os.Getenv("SMTP_SENDER"), "SMTP sender")
 
 	flag.Func("cors-trusted-origins", "Trusted CORS origins (space separated)", func(val string) error {
 		cfg.Cors.TrustedOrigins = strings.Fields(val)

@@ -30,8 +30,6 @@ func (app *application) routes(db *sql.DB) http.Handler {
 
 	_authService.RegisterHandlers(_authApp.NewAppl(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), app.config), router)
 
-	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", app.createAuthenticationTokenHandler)
-
 	router.Handler(http.MethodGet, "/v1/metrics", expvar.Handler())
 
 	router.Handler(http.MethodGet, "/swagger/:any", httpSwagger.WrapHandler)

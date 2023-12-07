@@ -250,7 +250,7 @@ const docTemplate = `{
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "CreateUseCase authentication token",
+                "summary": "Create authentication token",
                 "parameters": [
                     {
                         "description": "Request body",
@@ -258,7 +258,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/main.createAuthTokenRequest"
+                            "$ref": "#/definitions/domain.CreateAuthTokenRequest"
                         }
                     }
                 ],
@@ -266,7 +266,7 @@ const docTemplate = `{
                     "201": {
                         "description": "Authentication token",
                         "schema": {
-                            "$ref": "#/definitions/database.Token"
+                            "$ref": "#/definitions/domain.Token"
                         }
                     }
                 }
@@ -378,6 +378,17 @@ const docTemplate = `{
                 }
             }
         },
+        "domain.CreateAuthTokenRequest": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "password": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.CreateUserRequest": {
             "type": "object",
             "properties": {
@@ -388,6 +399,17 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "password": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Token": {
+            "type": "object",
+            "properties": {
+                "expiry": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }

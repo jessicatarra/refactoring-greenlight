@@ -15,7 +15,7 @@ https://greenlight.tarralva.com/swagger/index.html
     - [ ] Implement the create authentication token feature
   - [ ] Add a movies module
   - [ ] Add a healthcheck module
-- [ ] Refactor multiple functionalities into internal packages
+- [x] Refactor multiple functionalities into internal packages
   - [x] Add support for background tasks
   - [x] Add `log/slog` package
   - [x] Add `mailer` package

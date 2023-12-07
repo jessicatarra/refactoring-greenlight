@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/jessicatarra/greenlight/internal/database"
 	_errors "github.com/jessicatarra/greenlight/internal/errors"
+	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
 	"github.com/jessicatarra/greenlight/internal/utils/helpers"
@@ -17,7 +18,7 @@ type envelope map[string]interface{}
 type Resource interface {
 	createUser(res http.ResponseWriter, req *http.Request)
 	activateUser(res http.ResponseWriter, req *http.Request)
-	createToken(res http.ResponseWriter, req *http.Request)
+	createAuthenticationToken(res http.ResponseWriter, req *http.Request)
 }
 
 type resource struct {
@@ -62,7 +63,13 @@ func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := r.appl.CreateUseCase(input)
+	hashedPassword, err := password.Hash(input.Password)
+	if err != nil {
+		_errors.ServerError(res, req, err)
+		return
+	}
+
+	user, err := r.appl.CreateUseCase(input, hashedPassword)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrDuplicateEmail):
@@ -95,8 +102,7 @@ func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
 
 	input.TokenPlaintext = r.helpers.ReadString(qs, "token", "")
 
-	input.Validator.Check(input.TokenPlaintext != "", "token must be provided")
-	input.Validator.Check(len(input.TokenPlaintext) == 26, "token must be 26 bytes long")
+	ValidateToken(input)
 
 	if input.Validator.HasErrors() {
 		_errors.FailedValidation(res, req, input.Validator)
@@ -115,7 +121,15 @@ func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
-func (r *resource) createToken(res http.ResponseWriter, req *http.Request) {
+// @Summary Create authentication token
+// @Description Creates an authentication token for a user
+// @Tags Authentication
+// @Accept json
+// @Produce json
+// @Param request body domain.CreateAuthTokenRequest true "Request body"
+// @Success 201 {object} domain.Token "Authentication token"
+// @Router /tokens/authentication [post]
+func (r *resource) createAuthenticationToken(res http.ResponseWriter, req *http.Request) {
 	var input domain.CreateAuthTokenRequest
 
 	err := request.DecodeJSON(res, req, &input)
@@ -130,7 +144,32 @@ func (r *resource) createToken(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	input.Validator.CheckField(input.Email != "", "Email", "Email is required")
-	input.Validator.CheckField(existingUser != nil, "Email", "Email address could not be found")
+	ValidateEmailForAuth(input, existingUser)
+
+	if existingUser != nil {
+		passwordMatches, err := password.Matches(input.Password, existingUser.HashedPassword)
+		if err != nil {
+			_errors.ServerError(res, req, err)
+			return
+		}
+
+		ValidatePasswordForAuth(input, passwordMatches)
+	}
+
+	if input.Validator.HasErrors() {
+		_errors.FailedValidation(res, req, input.Validator)
+		return
+	}
+
+	jwtBytes, err := r.appl.CreateAuthTokenUseCase(existingUser.ID)
+	if err != nil {
+		_errors.ServerError(res, req, err)
+		return
+	}
+
+	err = response.JSON(res, http.StatusCreated, envelope{"authentication_token": string(jwtBytes)})
+	if err != nil {
+		_errors.ServerError(res, req, err)
+	}
 
 }

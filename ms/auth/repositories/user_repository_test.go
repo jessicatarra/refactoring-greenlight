@@ -6,6 +6,7 @@ package repositories
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/stretchr/testify/assert"
 	"testing"
@@ -19,25 +20,25 @@ func TestUserRepository_InsertNewUser(t *testing.T) {
 
 	repo := NewUserRepo(db)
 
-	hash := []byte("sampleHash")
+	hashedPassword, _ := password.Hash("password123!")
 
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
 		user := &domain.User{
-			Name:      "John Doe",
-			Email:     "johndoe@example.com",
-			Password:  domain.Password{Hash: hash},
-			Activated: true,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
 		}
 
 		rows := sqlmock.NewRows([]string{"id", "created_at", "version"}).
 			AddRow(1, time.Now(), 1)
 
 		mock.ExpectQuery("INSERT INTO users").
-			WithArgs(user.Name, user.Email, user.Password.Hash, user.Activated).WillReturnRows(rows)
+			WithArgs(user.Name, user.Email, user.HashedPassword, user.Activated).WillReturnRows(rows)
 
 		// Act
-		err := repo.InsertNewUser(user)
+		err := repo.InsertNewUser(user, hashedPassword)
 
 		// Assert
 		assert.NoError(t, err)
@@ -46,18 +47,18 @@ func TestUserRepository_InsertNewUser(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
 		user := &domain.User{
-			Name:      "John Doe",
-			Email:     "johndoe@example.com",
-			Password:  domain.Password{Hash: hash},
-			Activated: true,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
 		}
 
 		mock.ExpectQuery("INSERT INTO users").
-			WithArgs(user.Name, user.Email, user.Password.Hash, user.Activated).
+			WithArgs(user.Name, user.Email, user.HashedPassword, user.Activated).
 			WillReturnError(errors.New("some error"))
 
 		// Act
-		err := repo.InsertNewUser(user)
+		err := repo.InsertNewUser(user, hashedPassword)
 
 		// Assert
 		assert.Error(t, err)
@@ -114,23 +115,23 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 	defer db.Close()
 
 	repo := NewUserRepo(db)
-	hash := []byte("sampleHash")
+	hashedPassword, _ := password.Hash("password123!")
 
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
 		user := &domain.User{
-			ID:        1,
-			Name:      "John Doe",
-			Email:     "johndoe@example.com",
-			Password:  domain.Password{Hash: hash},
-			Activated: true,
-			Version:   1,
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+			Version:        1,
 		}
 
 		rows := sqlmock.NewRows([]string{"version"}).
 			AddRow(2)
 
-		mock.ExpectQuery("UPDATE users").WithArgs(user.Name, user.Email, user.Password.Hash, user.Activated, user.ID, user.Version).WillReturnRows(rows)
+		mock.ExpectQuery("UPDATE users").WithArgs(user.Name, user.Email, user.HashedPassword, user.Activated, user.ID, user.Version).WillReturnRows(rows)
 
 		// Act
 		err := repo.UpdateUser(user)
@@ -142,16 +143,16 @@ func TestUserRepository_UpdateUser(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
 		user := &domain.User{
-			ID:        1,
-			Name:      "John Doe",
-			Email:     "johndoe@example.com",
-			Password:  domain.Password{Hash: hash},
-			Activated: true,
-			Version:   1,
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+			Version:        1,
 		}
 
 		mock.ExpectExec("UPDATE users").
-			WithArgs(user.Name, user.Email, user.Password.Hash, user.Activated, user.Version, user.ID).
+			WithArgs(user.Name, user.Email, user.HashedPassword, user.Activated, user.Version, user.ID).
 			WillReturnError(errors.New("some error"))
 
 		// Act
