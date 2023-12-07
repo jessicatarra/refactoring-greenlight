@@ -297,6 +297,38 @@
                     }
                 }
             }
+        },
+        "/users/activated": {
+            "put": {
+                "description": "Activates a user account using a token that was previously sent when successfully register a new user",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Users"
+                ],
+                "summary": "Activate User",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Token for user activation",
+                        "name": "token",
+                        "in": "query",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/domain.User"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {

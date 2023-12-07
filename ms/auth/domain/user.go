@@ -1,7 +1,7 @@
 package domain
 
 import (
-	"github.com/jessicatarra/greenlight/internal/utils"
+	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"time"
 )
 
@@ -16,10 +16,10 @@ type User struct {
 }
 
 type CreateUserRequest struct {
-	Name      string          `json:"name"`
-	Email     string          `json:"email"`
-	Password  string          `json:"password"`
-	Validator utils.Validator `json:"-"`
+	Name      string              `json:"name"`
+	Email     string              `json:"email"`
+	Password  string              `json:"password"`
+	Validator validator.Validator `json:"-"`
 }
 
 type Appl interface {

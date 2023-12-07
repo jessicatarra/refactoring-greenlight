@@ -2,7 +2,7 @@ package errors
 
 import (
 	"github.com/jessicatarra/greenlight/internal/response"
-	"github.com/jessicatarra/greenlight/internal/utils"
+	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -48,7 +48,7 @@ func BadRequest(w http.ResponseWriter, r *http.Request, err error) {
 	errorMessage(w, r, http.StatusBadRequest, err.Error(), nil)
 }
 
-func FailedValidation(w http.ResponseWriter, r *http.Request, v utils.Validator) {
+func FailedValidation(w http.ResponseWriter, r *http.Request, v validator.Validator) {
 	err := response.JSON(w, http.StatusUnprocessableEntity, v)
 	if err != nil {
 		ServerError(w, r, err)

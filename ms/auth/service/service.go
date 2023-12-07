@@ -4,6 +4,8 @@ import (
 	"github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
+	"github.com/jessicatarra/greenlight/internal/utils/helpers"
+	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
@@ -15,11 +17,12 @@ type Resource interface {
 }
 
 type resource struct {
-	appl domain.Appl
+	appl    domain.Appl
+	helpers helpers.Helpers
 }
 
 func RegisterHandlers(appl domain.Appl, router *httprouter.Router) {
-	res := &resource{appl}
+	res := &resource{appl, helpers.New()}
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.create)
 }
@@ -62,7 +65,40 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 	}
 }
 
+// @Summary Activate User
+// @Description Activates a user account using a token that was previously sent when successfully register a new user
+// @Tags Users
+// @Accept json
+// @Produce  json
+// @Param token query string true "Token for user activation"
+// @Success 200 {object} domain.User
+// @Router /users/activated [put]
 func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
-	//TODO implement me
-	panic("implement me")
+	var input struct {
+		TokenPlaintext string
+		Validator      validator.Validator
+	}
+
+	qs := req.URL.Query()
+
+	input.TokenPlaintext = r.helpers.ReadString(qs, "token", "")
+
+	input.Validator.Check(input.TokenPlaintext != "", "token must be provided")
+	input.Validator.Check(len(input.TokenPlaintext) == 26, "token must be 26 bytes long")
+
+	if input.Validator.HasErrors() {
+		errors.FailedValidation(res, req, input.Validator)
+		return
+	}
+
+	user, err := r.appl.ActivateUseCase(input.TokenPlaintext)
+	if err != nil {
+		errors.ServerError(res, req, err)
+		return
+	}
+
+	err = response.JSON(res, http.StatusCreated, map[string]*domain.User{"user": user})
+	if err != nil {
+		errors.ServerError(res, req, err)
+	}
 }

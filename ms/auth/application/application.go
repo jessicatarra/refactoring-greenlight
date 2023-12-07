@@ -65,8 +65,24 @@ func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, erro
 }
 
 func (a *appl) ActivateUseCase(tokenPlainText string) (*domain.User, error) {
-	//TODO implement me
-	panic("implement me")
+	user, err := a.userRepo.GetForToken(repositories.ScopeActivation, tokenPlainText)
+	if err != nil {
+		return nil, err
+	}
+
+	user.Activated = true
+
+	err = a.userRepo.UpdateUser(user)
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.tokenRepo.DeleteAllForUser(repositories.ScopeActivation, user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return user, err
 }
 
 func (a *appl) GetByEmailUseCase(input domain.CreateUserRequest) (*domain.User, error) {
