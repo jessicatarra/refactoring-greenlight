@@ -25,6 +25,7 @@ func RegisterHandlers(appl domain.Appl, router *httprouter.Router) {
 	res := &resource{appl, helpers.New()}
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.create)
+	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activate)
 }
 
 // @Summary Register User

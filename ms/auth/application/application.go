@@ -3,11 +3,9 @@ package application
 import (
 	"github.com/jessicatarra/greenlight/internal/concurrent"
 	"github.com/jessicatarra/greenlight/internal/config"
-	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
-	"sync"
 	"time"
 )
 
@@ -15,19 +13,14 @@ type appl struct {
 	userRepo   domain.UserRepository
 	tokenRepo  domain.TokenRepository
 	concurrent concurrent.Resource
-	logger     *jsonlog.Logger
-	wg         *sync.WaitGroup
 	mailer     mailer.Mailer
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, logger *jsonlog.Logger,
-	wg *sync.WaitGroup, cfg config.Config) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, cfg config.Config) domain.Appl {
 	return &appl{
 		userRepo:   userRepo,
 		tokenRepo:  tokenRepo,
-		concurrent: concurrent.NewBackgroundTask(wg, logger),
-		logger:     logger,
-		wg:         wg,
+		concurrent: concurrent.NewBackgroundTask(),
 		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.Sender),
 	}
 }
@@ -46,17 +39,18 @@ func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, erro
 		return nil, err
 	}
 
-	fn := func() {
+	fn := func() error {
 		data := map[string]interface{}{
 			"activationToken": token.Plaintext,
 			"userID":          user.ID,
 		}
-		print(token.Plaintext)
+		//print(token.Plaintext)
 
 		err = a.mailer.Send(user.Email, "user_welcome.gohtml", data)
 		if err != nil {
-			a.logger.PrintError(err, nil)
+			return err
 		}
+		return nil
 	}
 
 	a.concurrent.BackgroundTask(fn)
