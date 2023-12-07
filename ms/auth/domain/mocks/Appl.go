@@ -72,9 +72,9 @@ func (_m *Appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, err
 	return r0, r1
 }
 
-// GetByEmailUseCase provides a mock function with given fields: input
-func (_m *Appl) GetByEmailUseCase(input domain.CreateUserRequest) (*domain.User, error) {
-	ret := _m.Called(input)
+// GetByEmailUseCase provides a mock function with given fields: email
+func (_m *Appl) GetByEmailUseCase(email string) (*domain.User, error) {
+	ret := _m.Called(email)
 
 	if len(ret) == 0 {
 		panic("no return value specified for GetByEmailUseCase")
@@ -82,19 +82,19 @@ func (_m *Appl) GetByEmailUseCase(input domain.CreateUserRequest) (*domain.User,
 
 	var r0 *domain.User
 	var r1 error
-	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) (*domain.User, error)); ok {
-		return rf(input)
+	if rf, ok := ret.Get(0).(func(string) (*domain.User, error)); ok {
+		return rf(email)
 	}
-	if rf, ok := ret.Get(0).(func(domain.CreateUserRequest) *domain.User); ok {
-		r0 = rf(input)
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
+		r0 = rf(email)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*domain.User)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(domain.CreateUserRequest) error); ok {
-		r1 = rf(input)
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(email)
 	} else {
 		r1 = ret.Error(1)
 	}

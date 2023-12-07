@@ -25,7 +25,7 @@ type CreateUserRequest struct {
 type Appl interface {
 	CreateUseCase(input CreateUserRequest) (*User, error)
 	ActivateUseCase(tokenPlainText string) (*User, error)
-	GetByEmailUseCase(input CreateUserRequest) (*User, error)
+	GetByEmailUseCase(email string) (*User, error)
 }
 
 type UserRepository interface {

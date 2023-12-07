@@ -110,7 +110,7 @@ func TestApp_GetByEmailUseCase(t *testing.T) {
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the CreateUseCase function
-		user, err := app.GetByEmailUseCase(input)
+		user, err := app.GetByEmailUseCase(input.Email)
 
 		// Assert the results
 		assert.Error(t, err)
@@ -136,7 +136,7 @@ func TestApp_GetByEmailUseCase(t *testing.T) {
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the GetByEmailUseCase function again
-		user, err := app.GetByEmailUseCase(input)
+		user, err := app.GetByEmailUseCase(input.Email)
 
 		// Assert the error step
 		assert.Nil(t, user)
