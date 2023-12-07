@@ -28,7 +28,12 @@ func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, c
 func (a *appl) CreateUseCase(input domain.CreateUserRequest) (*domain.User, error) {
 	user := &domain.User{Name: input.Name, Email: input.Email, Activated: false}
 
-	err := a.userRepo.InsertNewUser(user)
+	err := user.Password.Set(input.Password)
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.userRepo.InsertNewUser(user)
 
 	if err != nil {
 		return nil, err
@@ -79,9 +84,7 @@ func (a *appl) ActivateUseCase(tokenPlainText string) (*domain.User, error) {
 	return user, err
 }
 
-func (a *appl) GetByEmailUseCase(input domain.CreateUserRequest) (*domain.User, error) {
-	email := input.Email
-
+func (a *appl) GetByEmailUseCase(email string) (*domain.User, error) {
 	existingUser, err := a.userRepo.GetUserByEmail(email)
 	if err != nil {
 		return nil, err
