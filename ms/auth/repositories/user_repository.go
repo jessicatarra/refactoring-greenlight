@@ -11,12 +11,6 @@ import (
 	"time"
 )
 
-var (
-	ErrEditConflict   = errors.New("edit conflict")
-	ErrRecordNotFound = errors.New("record not found")
-	ErrDuplicateEmail = errors.New("duplicate email")
-)
-
 const defaultTimeout = 10 * time.Second
 
 type userRepository struct {
@@ -42,7 +36,7 @@ func (r *userRepository) InsertNewUser(user *domain.User) error {
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateEmail
+			return domain.ErrDuplicateEmail
 		default:
 			return err
 		}
@@ -75,7 +69,7 @@ func (r *userRepository) GetUserByEmail(email string) (*domain.User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, domain.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -106,9 +100,9 @@ func (r *userRepository) UpdateUser(user *domain.User) error {
 	if err != nil {
 		switch {
 		case err.Error() == `pq: duplicate key value violates unique constraint "users_email_key"`:
-			return ErrDuplicateEmail
+			return domain.ErrDuplicateEmail
 		case errors.Is(err, sql.ErrNoRows):
-			return ErrEditConflict
+			return domain.ErrEditConflict
 		default:
 			return err
 		}
@@ -148,7 +142,7 @@ func (r *userRepository) GetForToken(tokenScope string, tokenPlaintext string) (
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, domain.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -181,7 +175,7 @@ func (r *userRepository) GetUserById(id int64) (*domain.User, error) {
 	if err != nil {
 		switch {
 		case errors.Is(err, sql.ErrNoRows):
-			return nil, ErrRecordNotFound
+			return nil, domain.ErrRecordNotFound
 		default:
 			return nil, err
 		}
