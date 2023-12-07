@@ -2,37 +2,40 @@ package concurrent
 
 import (
 	"fmt"
-	"github.com/jessicatarra/greenlight/internal/jsonlog"
+	"github.com/jessicatarra/greenlight/internal/errors"
 	"sync"
 )
 
 type Resource interface {
-	BackgroundTask(fn func())
+	BackgroundTask(fn func() error)
 }
 
 type resource struct {
-	wg     *sync.WaitGroup
-	logger *jsonlog.Logger
 }
 
-func NewBackgroundTask(wg *sync.WaitGroup, logger *jsonlog.Logger) Resource {
-	return &resource{
-		wg:     wg,
-		logger: logger,
-	}
+func NewBackgroundTask() Resource {
+	return &resource{}
 }
 
-func (r *resource) BackgroundTask(fn func()) {
-	r.wg.Add(1)
+func (r *resource) BackgroundTask(fn func() error) {
+	var wg sync.WaitGroup
+	wg.Add(1)
 
 	go func() {
-		defer r.wg.Done()
+		defer wg.Done()
 		defer func() {
-			if err := recover(); err != nil {
-				r.logger.PrintError(fmt.Errorf("%s", err), nil)
+			err := recover()
+
+			if err != nil {
+				errors.ReportError(fmt.Errorf("%s", err))
+				return
 			}
 		}()
 
-		fn()
+		err := fn()
+		if err != nil {
+			errors.ReportError(fmt.Errorf("%s", err))
+			return
+		}
 	}()
 }
