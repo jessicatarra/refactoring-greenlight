@@ -1,4 +1,4 @@
-package utils
+package validator
 
 type Validator struct {
 	Errors      []string          `json:",omitempty"`
