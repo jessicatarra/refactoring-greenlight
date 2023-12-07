@@ -4,6 +4,9 @@ This project aims to refactor the Greenlight application by implementing clean a
 
 To understand the initial state of the project, please refer to the [previous README file](https://github.com/jessicatarra/greenlight/blob/main/README.md).
 
+### API Docs from V1 application version
+https://greenlight.tarralva.com/swagger/index.html
+
 ### TODO
 - [ ] Refactor initial routes implementation into separate service handlers
   - [ ] Add an authentication module
