@@ -5,11 +5,12 @@ import (
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
 	"github.com/jessicatarra/greenlight/internal/utils/helpers"
-	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"github.com/jessicatarra/greenlight/ms/auth/domain"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )
+
+type envelope map[string]interface{}
 
 type Resource interface {
 	create(res http.ResponseWriter, req *http.Request)
@@ -60,7 +61,7 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = response.JSON(res, http.StatusCreated, map[string]*domain.User{"user": user})
+	err = response.JSON(res, http.StatusCreated, envelope{"user": user})
 	if err != nil {
 		errors.ServerError(res, req, err)
 	}
@@ -75,10 +76,7 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 // @Success 200 {object} domain.User
 // @Router /users/activated [put]
 func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
-	var input struct {
-		TokenPlaintext string
-		Validator      validator.Validator
-	}
+	var input domain.ActivateUserRequest
 
 	qs := req.URL.Query()
 
@@ -98,7 +96,7 @@ func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = response.JSON(res, http.StatusCreated, map[string]*domain.User{"user": user})
+	err = response.JSON(res, http.StatusCreated, envelope{"user": user})
 	if err != nil {
 		errors.ServerError(res, req, err)
 	}

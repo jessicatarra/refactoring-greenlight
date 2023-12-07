@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/base32"
+	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"time"
 )
 
@@ -19,6 +20,11 @@ type Token struct {
 	UserID    int64     `json:"-"`
 	Expiry    time.Time `json:"expiry"`
 	Scope     string    `json:"-"`
+}
+
+type ActivateUserRequest struct {
+	TokenPlaintext string
+	Validator      validator.Validator
 }
 
 func (t *token) GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
