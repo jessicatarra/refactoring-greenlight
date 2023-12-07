@@ -87,10 +87,10 @@ func TestResource_Create(t *testing.T) {
 
 		// Mock CreateUseCase and GetByEmailUseCase
 		mockApp.On("CreateUseCase", expectedInput).Return(expectedUser, nil)
-		mockApp.On("GetByEmailUseCase", expectedInput).Return(nil, errors.New("record not found"))
+		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
 
 		// Act
-		res.create(resRec, req)
+		res.createUser(resRec, req)
 
 		// Assert
 		assertStatusCode(t, resRec, http.StatusCreated)
@@ -117,10 +117,10 @@ func TestResource_Create(t *testing.T) {
 
 		// Mock CreateUseCase and GetByEmailUseCase
 		mockApp.On("CreateUseCase", expectedInput).Return(nil, expectedErr)
-		mockApp.On("GetByEmailUseCase", expectedInput).Return(nil, errors.New("record not found"))
+		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
 
 		// Act
-		res.create(resRec, req)
+		res.createUser(resRec, req)
 
 		// Assert
 		assertStatusCode(t, resRec, http.StatusInternalServerError)
@@ -162,7 +162,7 @@ func TestResource_Activate(t *testing.T) {
 		mockApp.On("ActivateUseCase", expectedInput.TokenPlaintext).Return(expectedUser, nil)
 
 		// Act
-		res.activate(resRec, req)
+		res.activateUser(resRec, req)
 
 		// Assert
 		assertStatusCode(t, resRec, http.StatusCreated)
@@ -188,7 +188,7 @@ func TestResource_Activate(t *testing.T) {
 		mockApp.On("ActivateUseCase", expectedInput.TokenPlaintext).Return(nil, expectedErr)
 
 		// Act
-		res.activate(resRec, req)
+		res.activateUser(resRec, req)
 
 		// Assert
 		assertStatusCode(t, resRec, http.StatusInternalServerError)

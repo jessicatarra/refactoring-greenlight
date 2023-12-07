@@ -27,6 +27,12 @@ type ActivateUserRequest struct {
 	Validator      validator.Validator
 }
 
+type CreateAuthTokenRequest struct {
+	Email     string              `json:"email"`
+	Password  string              `json:"password"`
+	Validator validator.Validator `json:"-"`
+}
+
 func (t *token) GenerateToken(userID int64, ttl time.Duration, scope string) (*Token, error) {
 	token := &Token{
 		UserID: userID,

@@ -1,7 +1,9 @@
 package service
 
 import (
-	"github.com/jessicatarra/greenlight/internal/errors"
+	"errors"
+	"github.com/jessicatarra/greenlight/internal/database"
+	_errors "github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
 	"github.com/jessicatarra/greenlight/internal/utils/helpers"
@@ -13,8 +15,9 @@ import (
 type envelope map[string]interface{}
 
 type Resource interface {
-	create(res http.ResponseWriter, req *http.Request)
-	activate(res http.ResponseWriter, req *http.Request)
+	createUser(res http.ResponseWriter, req *http.Request)
+	activateUser(res http.ResponseWriter, req *http.Request)
+	createToken(res http.ResponseWriter, req *http.Request)
 }
 
 type resource struct {
@@ -25,8 +28,8 @@ type resource struct {
 func RegisterHandlers(appl domain.Appl, router *httprouter.Router) {
 	res := &resource{appl, helpers.New()}
 
-	router.HandlerFunc(http.MethodPost, "/v1/users", res.create)
-	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activate)
+	router.HandlerFunc(http.MethodPost, "/v1/users", res.createUser)
+	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activateUser)
 }
 
 // @Summary Register User
@@ -37,33 +40,43 @@ func RegisterHandlers(appl domain.Appl, router *httprouter.Router) {
 // @Param name body domain.CreateUserRequest true "User registration data"
 // @Success 201 {object} domain.User
 // @Router /users [post]
-func (r *resource) create(res http.ResponseWriter, req *http.Request) {
+func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
 	var input domain.CreateUserRequest
 
 	err := request.DecodeJSON(res, req, &input)
 	if err != nil {
-		errors.BadRequest(res, req, err)
+		_errors.BadRequest(res, req, err)
 		return
 	}
 
-	existingUser, _ := r.appl.GetByEmailUseCase(input)
+	existingUser, err := r.appl.GetByEmailUseCase(input.Email)
+	if err != nil && err.Error() != domain.ErrRecordNotFound.Error() {
+		_errors.ServerError(res, req, err)
+		return
+	}
 
 	ValidateUser(input, existingUser)
 
 	if input.Validator.HasErrors() {
-		errors.FailedValidation(res, req, input.Validator)
+		_errors.FailedValidation(res, req, input.Validator)
 		return
 	}
 
 	user, err := r.appl.CreateUseCase(input)
 	if err != nil {
-		errors.ServerError(res, req, err)
+		switch {
+		case errors.Is(err, database.ErrDuplicateEmail):
+			input.Validator.AddError("email a user with this email address already exists")
+			_errors.FailedValidation(res, req, input.Validator)
+		default:
+			_errors.ServerError(res, req, err)
+		}
 		return
 	}
 
 	err = response.JSON(res, http.StatusCreated, envelope{"user": user})
 	if err != nil {
-		errors.ServerError(res, req, err)
+		_errors.ServerError(res, req, err)
 	}
 }
 
@@ -75,7 +88,7 @@ func (r *resource) create(res http.ResponseWriter, req *http.Request) {
 // @Param token query string true "Token for user activation"
 // @Success 200 {object} domain.User
 // @Router /users/activated [put]
-func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
+func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
 	var input domain.ActivateUserRequest
 
 	qs := req.URL.Query()
@@ -86,18 +99,38 @@ func (r *resource) activate(res http.ResponseWriter, req *http.Request) {
 	input.Validator.Check(len(input.TokenPlaintext) == 26, "token must be 26 bytes long")
 
 	if input.Validator.HasErrors() {
-		errors.FailedValidation(res, req, input.Validator)
+		_errors.FailedValidation(res, req, input.Validator)
 		return
 	}
 
 	user, err := r.appl.ActivateUseCase(input.TokenPlaintext)
 	if err != nil {
-		errors.ServerError(res, req, err)
+		_errors.ServerError(res, req, err)
 		return
 	}
 
 	err = response.JSON(res, http.StatusCreated, envelope{"user": user})
 	if err != nil {
-		errors.ServerError(res, req, err)
+		_errors.ServerError(res, req, err)
 	}
+}
+
+func (r *resource) createToken(res http.ResponseWriter, req *http.Request) {
+	var input domain.CreateAuthTokenRequest
+
+	err := request.DecodeJSON(res, req, &input)
+	if err != nil {
+		_errors.BadRequest(res, req, err)
+		return
+	}
+
+	existingUser, err := r.appl.GetByEmailUseCase(input.Email)
+	if err != nil && err.Error() != domain.ErrRecordNotFound.Error() {
+		_errors.ServerError(res, req, err)
+		return
+	}
+
+	input.Validator.CheckField(input.Email != "", "Email", "Email is required")
+	input.Validator.CheckField(existingUser != nil, "Email", "Email address could not be found")
+
 }
