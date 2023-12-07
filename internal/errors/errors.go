@@ -5,16 +5,30 @@ import (
 	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"log/slog"
 	"net/http"
+	"runtime/debug"
 	"strings"
 )
 
-func reportServerError(r *http.Request, err error) {
+func ReportError(err error) {
 	var (
-		method = r.Method
-		url    = r.URL.String()
+		message = err.Error()
+		trace   = string(debug.Stack())
 	)
 
-	slog.Group("request", "method", method, "url", url)
+	slog.Error(message, "trace", trace)
+}
+
+func ReportServerError(r *http.Request, err error) {
+	var (
+		message = err.Error()
+		method  = r.Method
+		url     = r.URL.String()
+		trace   = string(debug.Stack())
+	)
+
+	requestAttrs := slog.Group("request", "method", method, "url", url)
+	slog.Error(message, requestAttrs, "trace", trace)
+
 }
 
 func errorMessage(w http.ResponseWriter, r *http.Request, status int, message string, headers http.Header) {
@@ -22,13 +36,13 @@ func errorMessage(w http.ResponseWriter, r *http.Request, status int, message st
 
 	err := response.JSONWithHeaders(w, status, map[string]string{"Error": message}, headers)
 	if err != nil {
-		reportServerError(r, err)
+		ReportServerError(r, err)
 		w.WriteHeader(http.StatusInternalServerError)
 	}
 }
 
 func ServerError(w http.ResponseWriter, r *http.Request, err error) {
-	reportServerError(r, err)
+	ReportServerError(r, err)
 
 	message := "The server encountered a problem and could not process your request"
 	errorMessage(w, r, http.StatusInternalServerError, message, nil)
