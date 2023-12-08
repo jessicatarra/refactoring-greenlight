@@ -139,8 +139,13 @@ func (r *resource) createAuthenticationToken(res http.ResponseWriter, req *http.
 	}
 
 	existingUser, err := r.appl.GetByEmailUseCase(input.Email)
-	if err != nil && err.Error() != domain.ErrRecordNotFound.Error() {
-		_errors.ServerError(res, req, err)
+	if err != nil {
+		switch {
+		case errors.Is(err, domain.ErrRecordNotFound):
+			_errors.InvalidAuthenticationToken(res, req)
+		default:
+			_errors.ServerError(res, req, err)
+		}
 		return
 	}
 
