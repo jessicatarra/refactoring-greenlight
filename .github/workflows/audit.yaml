@@ -29,11 +29,12 @@ jobs:
         run: |
           go test -tags auth ./... -v -coverprofile=coverage.out
           ls -la
+          pwd
 
       - name: Update coverage report
         uses: ncruces/go-coverage-report@v0
         with:
-          coverage-file: ./
+          coverage-file: .
           report: true
           chart: true
           amend: true
