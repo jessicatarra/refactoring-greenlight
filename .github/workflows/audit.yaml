@@ -26,15 +26,12 @@ jobs:
         run: make ci/cd/audit
 
       - name: Test
-        run: |
-          go test -tags auth ./... -v -coverprofile=coverage.out
-          ls -la
-          pwd
+        run: go test -tags auth ./... -v -coverprofile=coverage.out
 
       - name: Update coverage report
         uses: ncruces/go-coverage-report@v0
         with:
-          coverage-file: .
+          coverage-file: /home/runner/work/refactoring-greenlight/refactoring-greenlight/
           report: true
           chart: true
           amend: true
