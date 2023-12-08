@@ -1,7 +1,8 @@
 name: Audit
 
 on:
-  workflow_call:
+  push:
+    branches: [ "main" ]
 
 jobs:
   audit:
@@ -18,19 +19,20 @@ jobs:
       - name: Install staticcheck
         run: go install honnef.co/go/tools/cmd/staticcheck@latest
 
-
       - name: Create .envrc file
-        run: |
-          touch .envrc
-#          "export DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .envrc
-#          "export SMTP_HOST=${{ secrets.SMTP_HOST }}" >> .envrc
-#          "export SMTP_PORT=${{ secrets.SMTP_PORT }}" >> .envrc
-#          "export SMTP_USERNAME=${{ secrets.SMTP_USERNAME }}" >> .envrc
-#          "export SMTP_PASSWORD=${{ secrets.SMTP_PASSWORD }}" >> .envrc
-#          "export SMTP_SENDER=${{ secrets.SMTP_SENDER }}" >> .envrc
-#          "export CORS_TRUSTED_ORIGINS=${{ secrets.CORS_TRUSTED_ORIGINS }}" >> .envrc
-#          "export API_PORT=${{ secrets.API_PORT }}" >> .envrc
-#          "export API_ENV=${{ secrets.API_ENV }}" >> .envrc
+        run: touch .envrc
 
       - name: Run make audit
         run: make audit
+
+      - name: Update coverage report
+        uses: ncruces/go-coverage-report@v0
+        with:
+          report: true
+          chart: true
+          amend: true
+          reuse-go: true
+        if: |
+          matrix.os == 'ubuntu-latest' &&
+          github.event_name == 'push'
+    

@@ -21,7 +21,7 @@ audit: vendor
 	go vet ./...
 	staticcheck ./...
 	@echo 'Running tests...'
-	go test -tags integration ./... -v
+	go test -tags auth ./... -v
 
 
 .PHONY: vendor
