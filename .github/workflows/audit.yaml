@@ -23,7 +23,10 @@ jobs:
         run: touch .envrc
 
       - name: Run make audit
-        run: make audit
+        run: make ci/cd/audit
+
+      - name: Test
+        run: go test -tags auth ./... -v
 
       - name: Update coverage report
         uses: ncruces/go-coverage-report@v0
@@ -32,8 +35,5 @@ jobs:
           chart: true
           amend: true
           reuse-go: true
-        if: |
-          matrix.os == 'ubuntu-latest' &&
-          github.event_name == 'push'
         continue-on-error: true
     

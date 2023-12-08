@@ -24,6 +24,14 @@ audit: vendor
 	go test -tags auth ./... -v
 
 
+.PHONY: ci/cd/audit
+ci/cd/audit: vendor
+	@echo 'Formatting code...'
+	go fmt ./...
+	@echo 'Vetting code...'
+	go vet ./...
+	staticcheck ./...
+
 .PHONY: vendor
 vendor:
 	@echo 'Tidying and verifying module dependencies...' go mod tidy
