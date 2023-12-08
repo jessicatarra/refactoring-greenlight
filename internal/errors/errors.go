@@ -69,13 +69,13 @@ func FailedValidation(w http.ResponseWriter, r *http.Request, v validator.Valida
 	}
 }
 
-//func invalidAuthenticationToken(w http.ResponseWriter, r *http.Request) {
-//	headers := make(http.Header)
-//	headers.Set("WWW-Authenticate", "Bearer")
-//
-//	errorMessage(w, r, http.StatusUnauthorized, "Invalid authentication token", headers)
-//}
-//
+func InvalidAuthenticationToken(w http.ResponseWriter, r *http.Request) {
+	headers := make(http.Header)
+	headers.Set("WWW-Authenticate", "Bearer")
+
+	errorMessage(w, r, http.StatusUnauthorized, "Invalid authentication token", headers)
+}
+
 //func authenticationRequired(w http.ResponseWriter, r *http.Request) {
 //	errorMessage(w, r, http.StatusUnauthorized, "You must be authenticated to access this resource", nil)
 //}

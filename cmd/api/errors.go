@@ -56,11 +56,6 @@ func (app *application) editConflictResponse(writer http.ResponseWriter, request
 	app.errorResponse(writer, request, http.StatusConflict, message)
 }
 
-func (app *application) invalidCredentialsResponse(writer http.ResponseWriter, request *http.Request) {
-	message := "invalid authentication credentials"
-	app.errorResponse(writer, request, http.StatusUnauthorized, message)
-}
-
 func (app *application) invalidAuthenticationTokenResponse(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("WWW-Authenticate", "Bearer")
 
