@@ -28,7 +28,7 @@ func (app *application) routes(db *sql.DB) http.Handler {
 	router.HandlerFunc(http.MethodPatch, "/v1/movies/:id", app.requirePermission("movies:write", app.updateMovieHandler))
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.requirePermission("movies:write", app.deleteMovieHandler))
 
-	_authService.RegisterHandlers(_authApp.NewAppl(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), app.config), router)
+	_authService.RegisterHandlers(_authApp.NewAppl(_authRepo.NewUserRepo(db), _authRepo.NewTokenRepo(db), _authRepo.NewPermissionRepo(db), app.config), router)
 
 	router.Handler(http.MethodGet, "/v1/metrics", expvar.Handler())
 

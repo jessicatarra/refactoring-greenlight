@@ -12,20 +12,22 @@ import (
 )
 
 type appl struct {
-	userRepo   domain.UserRepository
-	tokenRepo  domain.TokenRepository
-	concurrent concurrent.Resource
-	mailer     mailer.Mailer
-	cfg        config.Config
+	userRepo       domain.UserRepository
+	tokenRepo      domain.TokenRepository
+	permissionRepo domain.PermissionRepository
+	concurrent     concurrent.Resource
+	mailer         mailer.Mailer
+	cfg            config.Config
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, cfg config.Config) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, cfg config.Config) domain.Appl {
 	return &appl{
-		userRepo:   userRepo,
-		tokenRepo:  tokenRepo,
-		concurrent: concurrent.NewBackgroundTask(),
-		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
-		cfg:        cfg,
+		userRepo:       userRepo,
+		tokenRepo:      tokenRepo,
+		permissionRepo: permissionRepo,
+		concurrent:     concurrent.NewBackgroundTask(),
+		mailer:         mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
+		cfg:            cfg,
 	}
 }
 
@@ -34,6 +36,11 @@ func (a *appl) CreateUseCase(input domain.CreateUserRequest, hashedPassword stri
 
 	err := a.userRepo.InsertNewUser(user, hashedPassword)
 
+	if err != nil {
+		return nil, err
+	}
+
+	err = a.permissionRepo.AddForUser(user.ID, "movies:read")
 	if err != nil {
 		return nil, err
 	}
