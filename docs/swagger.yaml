@@ -18,13 +18,6 @@ definitions:
       year:
         type: integer
     type: object
-  database.Token:
-    properties:
-      expiry:
-        type: string
-      token:
-        type: string
-    type: object
   domain.CreateAuthTokenRequest:
     properties:
       email:
@@ -59,13 +52,6 @@ definitions:
       id:
         type: integer
       name:
-        type: string
-    type: object
-  main.createAuthTokenRequest:
-    properties:
-      email:
-        type: string
-      password:
         type: string
     type: object
   main.createMovieRequest:

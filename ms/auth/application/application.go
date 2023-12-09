@@ -21,7 +21,7 @@ type appl struct {
 	cfg            config.Config
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, cfg config.Config, wg *sync.WaitGroup) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, wg *sync.WaitGroup, cfg config.Config) domain.Appl {
 	return &appl{
 		userRepo:       userRepo,
 		tokenRepo:      tokenRepo,

@@ -367,17 +367,6 @@ const docTemplate = `{
                 }
             }
         },
-        "database.Token": {
-            "type": "object",
-            "properties": {
-                "expiry": {
-                    "type": "string"
-                },
-                "token": {
-                    "type": "string"
-                }
-            }
-        },
         "domain.CreateAuthTokenRequest": {
             "type": "object",
             "properties": {
@@ -430,17 +419,6 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "name": {
-                    "type": "string"
-                }
-            }
-        },
-        "main.createAuthTokenRequest": {
-            "type": "object",
-            "properties": {
-                "email": {
-                    "type": "string"
-                },
-                "password": {
                     "type": "string"
                 }
             }
