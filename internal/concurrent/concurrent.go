@@ -11,18 +11,18 @@ type Resource interface {
 }
 
 type resource struct {
+	wg *sync.WaitGroup
 }
 
-func NewBackgroundTask() Resource {
-	return &resource{}
+func NewBackgroundTask(wg *sync.WaitGroup) Resource {
+	return &resource{wg: wg}
 }
 
 func (r *resource) BackgroundTask(fn func() error) {
-	var wg sync.WaitGroup
-	wg.Add(1)
+	r.wg.Add(1)
 
 	go func() {
-		defer wg.Done()
+		defer r.wg.Done()
 		defer func() {
 			err := recover()
 

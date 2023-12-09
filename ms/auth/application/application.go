@@ -8,6 +8,7 @@ import (
 	"github.com/jessicatarra/greenlight/ms/auth/repositories"
 	"github.com/pascaldekloe/jwt"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -20,12 +21,12 @@ type appl struct {
 	cfg            config.Config
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, cfg config.Config) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, cfg config.Config, wg *sync.WaitGroup) domain.Appl {
 	return &appl{
 		userRepo:       userRepo,
 		tokenRepo:      tokenRepo,
 		permissionRepo: permissionRepo,
-		concurrent:     concurrent.NewBackgroundTask(),
+		concurrent:     concurrent.NewBackgroundTask(wg),
 		mailer:         mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
 		cfg:            cfg,
 	}
