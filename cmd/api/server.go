@@ -7,7 +7,6 @@ import (
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"net/http"
-	"os"
 	"sync"
 	"time"
 )
@@ -24,8 +23,9 @@ func (m module) Start(wg *sync.WaitGroup) {
 		m.logger.PrintInfo("Starting Module1 server", map[string]string{"module": "legacy", "addr": m.server.Addr})
 		err := m.server.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
-			m.logger.PrintInfo("legacy module encountered an error", nil)
-			os.Exit(1)
+			m.logger.PrintFatal(err, map[string]string{
+				"error": "legacy module encountered an error",
+			})
 		}
 		m.logger.PrintInfo("Stopped Module server", map[string]string{"module": "legacy", "addr": m.server.Addr})
 
@@ -49,9 +49,8 @@ const (
 
 func NewModule(cfg config.Config, routes http.Handler, logger *jsonlog.Logger) *module {
 	srv := &http.Server{
-		Addr:    fmt.Sprintf(":%d", cfg.Port),
-		Handler: routes,
-		//ErrorLog:     slog.NewLogLogger(app.logger.Handler(), slog.LevelWarn),
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
+		Handler:      routes,
 		IdleTimeout:  defaultIdleTimeout,
 		ReadTimeout:  defaultReadTimeout,
 		WriteTimeout: defaultWriteTimeout,

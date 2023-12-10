@@ -53,9 +53,12 @@ func (m module) Shutdown(ctx context.Context, cancel func()) {
 
 func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup) *module {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
+
+	service := _service.NewService(db, cfg, wg, logger)
+
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 8082),
-		Handler:      _service.Routes(db, cfg, wg),
+		Handler:      service.Routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 		IdleTimeout:  defaultIdleTimeout,
 		ReadTimeout:  defaultReadTimeout,

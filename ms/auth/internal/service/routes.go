@@ -6,15 +6,36 @@ import (
 	appl "github.com/jessicatarra/greenlight/ms/auth/internal/application"
 	repo "github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
 	"github.com/julienschmidt/httprouter"
+	"log/slog"
 	"net/http"
 	"sync"
 )
 
-func Routes(db *sql.DB, cfg config.Config, wg *sync.WaitGroup) http.Handler {
+type Service interface {
+	Routes() http.Handler
+	logRequestMiddleware(next http.Handler) http.Handler
+}
 
+type service struct {
+	db     *sql.DB
+	cfg    config.Config
+	wg     *sync.WaitGroup
+	logger *slog.Logger
+}
+
+func NewService(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.Logger) Service {
+	return &service{
+		db:     db,
+		cfg:    cfg,
+		wg:     wg,
+		logger: logger,
+	}
+}
+
+func (s service) Routes() http.Handler {
 	router := httprouter.New()
 
-	RegisterHandlers(appl.NewAppl(repo.NewUserRepo(db), repo.NewTokenRepo(db), repo.NewPermissionRepo(db), wg, cfg), router)
+	RegisterHandlers(appl.NewAppl(repo.NewUserRepo(s.db), repo.NewTokenRepo(s.db), repo.NewPermissionRepo(s.db), s.wg, s.cfg), router)
 
-	return router
+	return s.logRequestMiddleware(router)
 }
