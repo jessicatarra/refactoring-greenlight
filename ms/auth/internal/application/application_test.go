@@ -46,7 +46,7 @@ func TestApp_CreateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the CreateUseCase function
 		input := domain.CreateUserRequest{
@@ -75,7 +75,7 @@ func TestApp_CreateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the CreateUseCase function
 		input := domain.CreateUserRequest{
@@ -105,7 +105,7 @@ func TestApp_GetByEmailUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the CreateUseCase function
 		input := domain.CreateUserRequest{
@@ -130,7 +130,7 @@ func TestApp_GetByEmailUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the CreateUseCase function
 		input := domain.CreateUserRequest{
@@ -159,7 +159,7 @@ func TestApp_ActivateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the ActivateUseCase function
 		tokenPlainText := "valid_token"
@@ -188,7 +188,7 @@ func TestApp_ActivateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the ActivateUseCase function
 		tokenPlainText := "valid_token"
@@ -210,7 +210,7 @@ func TestApp_ActivateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the ActivateUseCase function
 		tokenPlainText := "valid_token"
@@ -239,7 +239,7 @@ func TestApp_ActivateUseCase(t *testing.T) {
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 
 		// CreateUseCase the application instance with the repositories mock
-		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, cfg, &wg)
+		app := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		// Prepare the input for the ActivateUseCase function
 		tokenPlainText := "valid_token"
