@@ -44,9 +44,6 @@ github.com/josharian/intern
 # github.com/julienschmidt/httprouter v1.3.0
 ## explicit; go 1.7
 github.com/julienschmidt/httprouter
-# github.com/justinas/alice v1.2.0
-## explicit; go 1.12
-github.com/justinas/alice
 # github.com/lib/pq v1.10.9
 ## explicit; go 1.13
 github.com/lib/pq

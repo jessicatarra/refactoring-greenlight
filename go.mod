@@ -7,7 +7,6 @@ require (
 	github.com/go-mail/mail/v2 v2.3.0
 	github.com/golang-migrate/migrate/v4 v4.16.2
 	github.com/julienschmidt/httprouter v1.3.0
-	github.com/justinas/alice v1.2.0
 	github.com/lib/pq v1.10.9
 	github.com/pascaldekloe/jwt v1.12.0
 	github.com/stretchr/testify v1.8.1

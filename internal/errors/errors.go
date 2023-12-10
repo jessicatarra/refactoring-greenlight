@@ -48,6 +48,11 @@ func ServerError(w http.ResponseWriter, r *http.Request, err error) {
 	errorMessage(w, r, http.StatusInternalServerError, message, nil)
 }
 
+func RateLimitExceeded(w http.ResponseWriter, r *http.Request) {
+	message := "rate limit exceeded"
+	errorMessage(w, r, http.StatusTooManyRequests, message, nil)
+}
+
 //func notFound(w http.ResponseWriter, r *http.Request) {
 //	message := "The requested resource could not be found"
 //	errorMessage(w, r, http.StatusNotFound, message, nil)
