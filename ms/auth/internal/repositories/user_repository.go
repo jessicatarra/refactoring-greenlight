@@ -6,7 +6,7 @@ import (
 	"database/sql"
 	"errors"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	_ "github.com/lib/pq"
 	"time"
 )

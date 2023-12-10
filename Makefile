@@ -44,15 +44,16 @@ generate/api/docs:
 	@echo 'Remove docs...'
 	rm -rf docs
 	@echo 'Generate updated docs folder'
-	swag init -d cmd/api,ms/auth/service --parseDependency --parseInternal --parseDepth 2
+	swag init -d cmd/api,ms/auth/internal/service --parseDependency --parseInternal --parseDepth 2
 
 
 .PHONY: generate/auth/mocks
 generate/auth/mocks:
 	@echo 'Remove mocks...'
-	rm -rf ms/auth/domain/mocks
+	rm -rf ms/auth/internal/domain/mocks
 	@echo 'Generate updated mocks...'
-	mockery --all --output=ms/auth/domain/mocks --dir=ms/auth/domain
+	mockery --all --output=ms/auth/internal/domain/mocks --dir=ms/auth/internal/domain
+	mockery --all --output=ms/auth/internal/service/mocks --dir=ms/auth/internal/service
 
 
 # ====================================================================================

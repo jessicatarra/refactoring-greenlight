@@ -4,8 +4,8 @@ import (
 	"github.com/jessicatarra/greenlight/internal/concurrent"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/mailer"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
-	"github.com/jessicatarra/greenlight/ms/auth/repositories"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
 	"github.com/pascaldekloe/jwt"
 	"strconv"
 	"sync"
@@ -21,7 +21,7 @@ type appl struct {
 	cfg            config.Config
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, cfg config.Config, wg *sync.WaitGroup) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, wg *sync.WaitGroup, cfg config.Config) domain.Appl {
 	return &appl{
 		userRepo:       userRepo,
 		tokenRepo:      tokenRepo,

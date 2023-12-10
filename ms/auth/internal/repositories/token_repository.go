@@ -3,7 +3,7 @@ package repositories
 import (
 	"context"
 	"database/sql"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"time"
 )
 

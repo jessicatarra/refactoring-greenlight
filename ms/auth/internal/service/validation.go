@@ -3,7 +3,7 @@ package service
 import (
 	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/internal/utils/validator"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 )
 
 func ValidateUser(input domain.CreateUserRequest, existingUser *domain.User) {

@@ -2,70 +2,59 @@ package main
 
 import (
 	"context"
-	"database/sql"
 	"errors"
 	"fmt"
+	"github.com/jessicatarra/greenlight/internal/config"
+	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"net/http"
-	"os"
-	"os/signal"
-	"syscall"
+	"sync"
 	"time"
 )
 
-func (app *application) serve(db *sql.DB) error {
-	srv := &http.Server{
-		Addr:         fmt.Sprintf(":%d", app.config.Port),
-		Handler:      app.routes(db),
-		IdleTimeout:  time.Minute,
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 30 * time.Second,
-	}
+type module struct {
+	server *http.Server
+	logger *jsonlog.Logger
+}
 
-	shutdownError := make(chan error)
-
+func (m module) Start(wg *sync.WaitGroup) {
+	wg.Add(1)
 	go func() {
-		quit := make(chan os.Signal, 1)
-		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
-		s := <-quit
-
-		app.logger.PrintInfo("caught signal", map[string]string{
-			"signal": s.String(),
-		})
-
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-		defer cancel()
-
-		err := srv.Shutdown(ctx)
-		if err != nil {
-			shutdownError <- err
+		defer wg.Done()
+		m.logger.PrintInfo("Starting Module1 server", map[string]string{"module": "legacy", "addr": m.server.Addr})
+		err := m.server.ListenAndServe()
+		if !errors.Is(err, http.ErrServerClosed) {
+			m.logger.PrintFatal(err, map[string]string{
+				"error": "legacy module encountered an error",
+			})
 		}
+		m.logger.PrintInfo("Stopped Module server", map[string]string{"module": "legacy", "addr": m.server.Addr})
 
-		app.logger.PrintInfo("completing background tasks", map[string]string{
-			"addr": srv.Addr,
-		})
-
-		app.wg.Wait()
-		shutdownError <- nil
 	}()
+}
 
-	app.logger.PrintInfo("starting server", map[string]string{
-		"addr": srv.Addr,
-		"env":  app.config.Env,
-	})
+func (m module) Shutdown(ctx context.Context, cancel func()) {
+	defer cancel()
 
-	err := srv.ListenAndServe()
-	if !errors.Is(err, http.ErrServerClosed) {
-		return err
-	}
-
-	err = <-shutdownError
+	err := m.server.Shutdown(ctx)
 	if err != nil {
-		return err
+		return
+	}
+}
+
+const (
+	defaultIdleTimeout  = time.Minute
+	defaultReadTimeout  = 5 * time.Second
+	defaultWriteTimeout = 10 * time.Second
+)
+
+func NewModule(cfg config.Config, routes http.Handler, logger *jsonlog.Logger) *module {
+	srv := &http.Server{
+		Addr:         fmt.Sprintf(":%d", cfg.Port),
+		Handler:      routes,
+		IdleTimeout:  defaultIdleTimeout,
+		ReadTimeout:  defaultReadTimeout,
+		WriteTimeout: defaultWriteTimeout,
 	}
 
-	app.logger.PrintInfo("stopped server", map[string]string{
-		"addr": srv.Addr,
-	})
-
-	return nil
+	return &module{server: srv, logger: logger}
 }

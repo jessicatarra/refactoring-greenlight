@@ -1,11 +1,13 @@
 package main
 
 import (
+	"database/sql"
 	"expvar"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/database"
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/mailer"
+	_auth "github.com/jessicatarra/greenlight/ms/auth"
 	"os"
 	"runtime"
 	"sync"
@@ -44,6 +46,23 @@ func main() {
 	defer db.Close()
 	logger.PrintInfo("database connection pool established", nil)
 
+	initMetrics(db)
+
+	app := newLegacyApplication(cfg, logger, db)
+
+	monolith := NewModularMonolith(&app.wg)
+
+	monolith.AddModule(NewModule(cfg, app.routes(), app.logger))
+	monolith.AddModule(_auth.NewModule(db, cfg, &app.wg))
+
+	err = monolith.Run()
+	if err != nil {
+		logger.PrintFatal(err, nil)
+		return
+	}
+}
+
+func initMetrics(db *sql.DB) {
 	expvar.NewString("version").Set(config.Version)
 
 	expvar.Publish("goroutines", expvar.Func(func() interface{} {
@@ -57,17 +76,13 @@ func main() {
 	expvar.Publish("timestamp", expvar.Func(func() interface{} {
 		return time.Now().Unix()
 	}))
+}
 
-	app := &application{
+func newLegacyApplication(cfg config.Config, logger *jsonlog.Logger, db *sql.DB) *application {
+	return &application{
 		config: cfg,
 		logger: logger,
 		models: database.NewModels(db),
 		mailer: mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
-	}
-
-	err = app.serve(db)
-	if err != nil {
-		logger.PrintFatal(err, nil)
-		return
 	}
 }
