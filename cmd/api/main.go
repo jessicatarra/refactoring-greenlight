@@ -52,7 +52,7 @@ func main() {
 
 	monolith := NewModularMonolith(&app.wg)
 
-	monolith.AddModule(NewModule(cfg, app.routes()))
+	monolith.AddModule(NewModule(cfg, app.routes(), app.logger))
 	monolith.AddModule(_auth.NewModule(db, cfg, &app.wg))
 
 	err = monolith.Run()

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/config"
+	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"net/http"
 	"os"
 	"sync"
@@ -13,23 +14,21 @@ import (
 
 type module struct {
 	server *http.Server
+	logger *jsonlog.Logger
 }
 
 func (m module) Start(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		//m.logger.PrintInfo("Starting Module1 server", map[string]string{"module": "legacy", "addr": m.server.Addr})
-		fmt.Printf("starting legacy module %s", m.server.Addr)
+		m.logger.PrintInfo("Starting Module1 server", map[string]string{"module": "legacy", "addr": m.server.Addr})
 		err := m.server.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
-			//m.logger.PrintInfo("legacy module encountered an error", nil)
-			fmt.Print("legacy module encountered an error")
+			m.logger.PrintInfo("legacy module encountered an error", nil)
 			os.Exit(1)
 		}
-		//m.logger.PrintInfo("Stopped Module server", map[string]string{"module": "legacy", "addr": m.server.Addr})
+		m.logger.PrintInfo("Stopped Module server", map[string]string{"module": "legacy", "addr": m.server.Addr})
 
-		fmt.Printf("Stopped Module server %s", m.server.Addr)
 	}()
 }
 
@@ -46,10 +45,9 @@ const (
 	defaultIdleTimeout  = time.Minute
 	defaultReadTimeout  = 5 * time.Second
 	defaultWriteTimeout = 10 * time.Second
-	//defaultShutdownPeriod = 30 * time.Second
 )
 
-func NewModule(cfg config.Config, routes http.Handler) *module {
+func NewModule(cfg config.Config, routes http.Handler, logger *jsonlog.Logger) *module {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%d", cfg.Port),
 		Handler: routes,
@@ -59,5 +57,5 @@ func NewModule(cfg config.Config, routes http.Handler) *module {
 		WriteTimeout: defaultWriteTimeout,
 	}
 
-	return &module{server: srv}
+	return &module{server: srv, logger: logger}
 }
