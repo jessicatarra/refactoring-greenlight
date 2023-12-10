@@ -10,11 +10,13 @@ To understand the initial state of the project, please refer to the [previous RE
 https://greenlight.tarralva.com/swagger/index.html
 
 ### TODO
-- [ ] Refactor initial routes implementation into separate service handlers
+- [x] Implement a modular monolith architecture style
+- [ ] Refactor initial implementation into separate modules 
   - [ ] Add an authentication module
     - [x] Implement the create user feature
     - [x] Implement the activate user feature
-    - [ ] Implement the create authentication token feature
+    - [x] Implement the create authentication token feature
+    - [ ] Create auth specific middleware
   - [ ] Add a movies module
   - [ ] Add a healthcheck module
 - [x] Refactor multiple functionalities into internal packages
@@ -29,9 +31,7 @@ https://greenlight.tarralva.com/swagger/index.html
   - [x] Add request package
   - [x] Add errors package
   - [x] Add config package
-- [ ] Refactor initial API server implementation
-- [ ] Relocate initial middleware implementation into the different modules based on the concerns of each one
-- [ ] Implement an actual modular monolith
+  - [x] Add shared middleware package
 
 ### References
 
