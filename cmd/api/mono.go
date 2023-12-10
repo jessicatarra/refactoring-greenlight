@@ -3,36 +3,42 @@ package main
 import (
 	"context"
 	"fmt"
-	"net/http"
 	"os"
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 )
 
-type ModularMonolith struct {
-	Modules []*Module
-	wg      *sync.WaitGroup
-	ctx     context.Context
+type Module interface {
+	Start(wg *sync.WaitGroup)
+	Shutdown(ctx context.Context, cancel func())
 }
 
-func NewModularMonolith(ctx context.Context, wg *sync.WaitGroup) *ModularMonolith {
+type ModularMonolith struct {
+	Modules []Module
+	wg      *sync.WaitGroup
+}
+
+func NewModularMonolith(wg *sync.WaitGroup) *ModularMonolith {
 	return &ModularMonolith{
-		Modules: []*Module{},
+		Modules: []Module{},
 		wg:      wg,
-		ctx:     ctx,
 	}
 }
 
-func (mm *ModularMonolith) AddModule(name string, addr int, handler http.Handler) {
-	module := NewModule(name, addr, handler, mm.wg)
+func (mm *ModularMonolith) AddModule(module Module) {
+	//module := NewModule(name, addr, handler, mm.wg)
 	mm.Modules = append(mm.Modules, module)
 }
 
 func (mm *ModularMonolith) Run() error {
 	for _, module := range mm.Modules {
 		mm.wg.Add(1)
-		go module.Run(mm.ctx)
+		go func(m Module) {
+			defer mm.wg.Done()
+			m.Start(mm.wg)
+		}(module)
 	}
 
 	// Wait for termination signal
@@ -54,8 +60,11 @@ func (mm *ModularMonolith) Run() error {
 }
 
 func (mm *ModularMonolith) StopAllModules() {
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	for _, module := range mm.Modules {
-		module.Stop()
+		module.Shutdown(ctx, cancel)
 	}
 }
 
