@@ -8,7 +8,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/request"
 	"github.com/jessicatarra/greenlight/internal/response"
 	"github.com/jessicatarra/greenlight/internal/utils/helpers"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/julienschmidt/httprouter"
 	"net/http"
 )

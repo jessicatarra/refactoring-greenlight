@@ -6,8 +6,8 @@ package repositories
 import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
-	"github.com/jessicatarra/greenlight/ms/auth/domain/mocks"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain/mocks"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"

@@ -7,7 +7,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/database"
 	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/mailer"
-	_auth "github.com/jessicatarra/greenlight/ms/auth/service"
+	_auth "github.com/jessicatarra/greenlight/ms/auth"
 	"os"
 	"runtime"
 	"sync"

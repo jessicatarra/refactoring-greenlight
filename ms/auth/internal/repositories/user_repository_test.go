@@ -7,7 +7,7 @@ import (
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jessicatarra/greenlight/internal/password"
-	"github.com/jessicatarra/greenlight/ms/auth/domain"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
