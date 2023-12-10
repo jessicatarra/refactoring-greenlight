@@ -53,6 +53,7 @@ generate/auth/mocks:
 	rm -rf ms/auth/internal/domain/mocks
 	@echo 'Generate updated mocks...'
 	mockery --all --output=ms/auth/internal/domain/mocks --dir=ms/auth/internal/domain
+	mockery --all --output=ms/auth/internal/service/mocks --dir=ms/auth/internal/service
 
 
 # ====================================================================================
