@@ -23,6 +23,8 @@ func (app *application) logRequest(next http.Handler) http.Handler {
 	})
 }
 
+// TODO: relocate following middleware into auth module and remote called then from legacy module
+
 func (app *application) authenticate(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		writer.Header().Add("Vary", "Authorization")
