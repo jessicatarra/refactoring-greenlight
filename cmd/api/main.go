@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"expvar"
 	"github.com/jessicatarra/greenlight/internal/config"
@@ -19,7 +20,7 @@ type application struct {
 	logger *jsonlog.Logger
 	models database.Models
 	mailer mailer.Mailer
-	wg     sync.WaitGroup
+	//wg     sync.WaitGroup
 }
 
 // @title Greenlight API Docs
@@ -48,14 +49,23 @@ func main() {
 
 	initMetrics(db)
 
+	var wg sync.WaitGroup
+
 	app := newLegacyApplication(cfg, logger, db)
 
-	monolith := NewModularMonolith()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	monolith := NewModularMonolith(ctx, &wg)
 
 	monolith.AddModule("Legacy Module", cfg.Port, app.routes())
-	monolith.AddModule("Auth Module", 8082, _authRoutes.Routes(db, cfg, &monolith.wg))
+	monolith.AddModule("Auth Module", 8082, _authRoutes.Routes(db, cfg, ctx, &wg))
 
-	monolith.Run()
+	err = monolith.Run()
+	if err != nil {
+		logger.PrintFatal(err, nil)
+		return
+	}
 }
 
 func initMetrics(db *sql.DB) {

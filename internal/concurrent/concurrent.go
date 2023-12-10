@@ -1,6 +1,7 @@
 package concurrent
 
 import (
+	"context"
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/errors"
 	"sync"
@@ -11,11 +12,12 @@ type Resource interface {
 }
 
 type resource struct {
-	wg *sync.WaitGroup
+	wg  *sync.WaitGroup
+	ctx context.Context
 }
 
-func NewBackgroundTask(wg *sync.WaitGroup) Resource {
-	return &resource{wg: wg}
+func NewBackgroundTask(ctx context.Context, wg *sync.WaitGroup) Resource {
+	return &resource{ctx: ctx, wg: wg}
 }
 
 func (r *resource) BackgroundTask(fn func() error) {
@@ -32,10 +34,15 @@ func (r *resource) BackgroundTask(fn func() error) {
 			}
 		}()
 
-		err := fn()
-		if err != nil {
-			errors.ReportError(fmt.Errorf("%s", err))
+		select {
+		case <-r.ctx.Done():
 			return
+		default:
+			err := fn()
+			if err != nil {
+				errors.ReportError(fmt.Errorf("%s", err))
+				return
+			}
 		}
 	}()
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
@@ -11,30 +12,32 @@ import (
 
 type ModularMonolith struct {
 	Modules []*Module
-	wg      sync.WaitGroup
+	wg      *sync.WaitGroup
+	ctx     context.Context
 }
 
-func NewModularMonolith() *ModularMonolith {
+func NewModularMonolith(ctx context.Context, wg *sync.WaitGroup) *ModularMonolith {
 	return &ModularMonolith{
 		Modules: []*Module{},
-		wg:      sync.WaitGroup{},
+		wg:      wg,
+		ctx:     ctx,
 	}
 }
 
 func (mm *ModularMonolith) AddModule(name string, addr int, handler http.Handler) {
-	module := NewModule(name, addr, handler)
+	module := NewModule(name, addr, handler, mm.wg)
 	mm.Modules = append(mm.Modules, module)
 }
 
-func (mm *ModularMonolith) Run() {
+func (mm *ModularMonolith) Run() error {
 	for _, module := range mm.Modules {
 		mm.wg.Add(1)
-		go module.Run(&mm.wg)
+		go module.Run(mm.ctx)
 	}
 
 	// Wait for termination signal
 	signalCh := make(chan os.Signal, 1)
-	signal.Notify(signalCh, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(signalCh, syscall.SIGINT, syscall.SIGTERM)
 
 	// Wait for termination signal or all modules to finish
 	select {
@@ -44,6 +47,10 @@ func (mm *ModularMonolith) Run() {
 	case <-mm.waitAll():
 		fmt.Println("All modules finished. Exiting...")
 	}
+
+	fmt.Println("All modules stopped. Exiting...")
+	mm.waitAll()
+	return nil
 }
 
 func (mm *ModularMonolith) StopAllModules() {

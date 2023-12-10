@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"github.com/jessicatarra/greenlight/internal/concurrent"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/mailer"
@@ -21,12 +22,12 @@ type appl struct {
 	cfg            config.Config
 }
 
-func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, wg *sync.WaitGroup, cfg config.Config) domain.Appl {
+func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, permissionRepo domain.PermissionRepository, ctx context.Context, wg *sync.WaitGroup, cfg config.Config) domain.Appl {
 	return &appl{
 		userRepo:       userRepo,
 		tokenRepo:      tokenRepo,
 		permissionRepo: permissionRepo,
-		concurrent:     concurrent.NewBackgroundTask(wg),
+		concurrent:     concurrent.NewBackgroundTask(ctx, wg),
 		mailer:         mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
 		cfg:            cfg,
 	}
