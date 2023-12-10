@@ -15,22 +15,29 @@ import (
 
 type envelope map[string]interface{}
 
-type Resource interface {
+type Handlers interface {
 	createUser(res http.ResponseWriter, req *http.Request)
 	activateUser(res http.ResponseWriter, req *http.Request)
 	createAuthenticationToken(res http.ResponseWriter, req *http.Request)
 }
 
-type resource struct {
+type handlers struct {
 	appl    domain.Appl
 	helpers helpers.Helpers
 }
 
-func (s service) registerHandlers(appl domain.Appl, router *httprouter.Router) {
-	res := &resource{appl, helpers.New()}
+func (s service) Handlers(appl domain.Appl, router *httprouter.Router) {
+	res := registerHandlers(appl)
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.createUser)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activateUser)
+}
+
+func registerHandlers(appl domain.Appl) Handlers {
+	return &handlers{
+		appl:    appl,
+		helpers: helpers.New(),
+	}
 }
 
 // @Summary Register User
@@ -41,7 +48,7 @@ func (s service) registerHandlers(appl domain.Appl, router *httprouter.Router) {
 // @Param name body domain.CreateUserRequest true "User registration data"
 // @Success 201 {object} domain.User
 // @Router /users [post]
-func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) createUser(res http.ResponseWriter, req *http.Request) {
 	var input domain.CreateUserRequest
 
 	err := request.DecodeJSON(res, req, &input)
@@ -50,7 +57,7 @@ func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	existingUser, err := r.appl.GetByEmailUseCase(input.Email)
+	existingUser, err := h.appl.GetByEmailUseCase(input.Email)
 	if err != nil && err.Error() != domain.ErrRecordNotFound.Error() {
 		_errors.ServerError(res, req, err)
 		return
@@ -69,7 +76,7 @@ func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := r.appl.CreateUseCase(input, hashedPassword)
+	user, err := h.appl.CreateUseCase(input, hashedPassword)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrDuplicateEmail):
@@ -95,12 +102,12 @@ func (r *resource) createUser(res http.ResponseWriter, req *http.Request) {
 // @Param token query string true "Token for user activation"
 // @Success 200 {object} domain.User
 // @Router /users/activated [put]
-func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) activateUser(res http.ResponseWriter, req *http.Request) {
 	var input domain.ActivateUserRequest
 
 	qs := req.URL.Query()
 
-	input.TokenPlaintext = r.helpers.ReadString(qs, "token", "")
+	input.TokenPlaintext = h.helpers.ReadString(qs, "token", "")
 
 	ValidateToken(input)
 
@@ -109,7 +116,7 @@ func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := r.appl.ActivateUseCase(input.TokenPlaintext)
+	user, err := h.appl.ActivateUseCase(input.TokenPlaintext)
 	if err != nil {
 		_errors.ServerError(res, req, err)
 		return
@@ -129,7 +136,7 @@ func (r *resource) activateUser(res http.ResponseWriter, req *http.Request) {
 // @Param request body domain.CreateAuthTokenRequest true "Request body"
 // @Success 201 {object} domain.Token "Authentication token"
 // @Router /tokens/authentication [post]
-func (r *resource) createAuthenticationToken(res http.ResponseWriter, req *http.Request) {
+func (h *handlers) createAuthenticationToken(res http.ResponseWriter, req *http.Request) {
 	var input domain.CreateAuthTokenRequest
 
 	err := request.DecodeJSON(res, req, &input)
@@ -138,7 +145,7 @@ func (r *resource) createAuthenticationToken(res http.ResponseWriter, req *http.
 		return
 	}
 
-	existingUser, err := r.appl.GetByEmailUseCase(input.Email)
+	existingUser, err := h.appl.GetByEmailUseCase(input.Email)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrRecordNotFound):
@@ -166,7 +173,7 @@ func (r *resource) createAuthenticationToken(res http.ResponseWriter, req *http.
 		return
 	}
 
-	jwtBytes, err := r.appl.CreateAuthTokenUseCase(existingUser.ID)
+	jwtBytes, err := h.appl.CreateAuthTokenUseCase(existingUser.ID)
 	if err != nil {
 		_errors.ServerError(res, req, err)
 		return

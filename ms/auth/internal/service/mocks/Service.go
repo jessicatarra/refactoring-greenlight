@@ -17,6 +17,11 @@ type Service struct {
 	mock.Mock
 }
 
+// Handlers provides a mock function with given fields: appl, router
+func (_m *Service) Handlers(appl domain.Appl, router *httprouter.Router) {
+	_m.Called(appl, router)
+}
+
 // Routes provides a mock function with given fields:
 func (_m *Service) Routes() http.Handler {
 	ret := _m.Called()
@@ -55,11 +60,6 @@ func (_m *Service) logRequestMiddleware(next http.Handler) http.Handler {
 	}
 
 	return r0
-}
-
-// registerHandlers provides a mock function with given fields: appl, router
-func (_m *Service) registerHandlers(appl domain.Appl, router *httprouter.Router) {
-	_m.Called(appl, router)
 }
 
 // NewService creates a new instance of Service. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.

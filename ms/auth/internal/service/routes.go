@@ -11,7 +11,7 @@ import (
 func (s service) Routes() http.Handler {
 	router := httprouter.New()
 
-	s.registerHandlers(appl.NewAppl(repo.NewUserRepo(s.db), repo.NewTokenRepo(s.db), repo.NewPermissionRepo(s.db), s.wg, s.cfg), router)
+	s.Handlers(appl.NewAppl(repo.NewUserRepo(s.db), repo.NewTokenRepo(s.db), repo.NewPermissionRepo(s.db), s.wg, s.cfg), router)
 
 	m := middleware.NewSharedMiddleware(&s.cfg)
 
