@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/database"
+	_errors "github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/validator"
 	"net/http"
 )
@@ -36,7 +37,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 
 	err := app.readJSON(writer, request, &input)
 	if err != nil {
-		app.badRequestResponse(writer, request, err)
+		_errors.BadRequest(writer, request, err)
 		return
 	}
 
@@ -52,13 +53,13 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 	database.ValidateMovie(v, movie)
 
 	if !v.Valid() {
-		app.failedValidationResponse(writer, request, v.Errors)
+		_errors.LegacyFailedValidation(writer, request, v.Errors)
 		return
 	}
 
 	err = app.models.Movies.Insert(movie)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 		return
 	}
 
@@ -67,7 +68,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 
 	err = app.writeJSON(writer, http.StatusCreated, envelope{"movie": movie}, headers)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 	}
 }
 
@@ -83,7 +84,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 func (app *application) showMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	id, err := app.readIDParam(request)
 	if err != nil {
-		app.notFoundResponse(writer, request)
+		_errors.NotFound(writer, request)
 		return
 	}
 
@@ -91,16 +92,16 @@ func (app *application) showMovieHandler(writer http.ResponseWriter, request *ht
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
-			app.notFoundResponse(writer, request)
+			_errors.NotFound(writer, request)
 		default:
-			app.serverErrorResponse(writer, request, err)
+			_errors.ServerError(writer, request, err)
 		}
 		return
 	}
 
 	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 	}
 }
 
@@ -117,7 +118,7 @@ func (app *application) showMovieHandler(writer http.ResponseWriter, request *ht
 func (app *application) updateMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	id, err := app.readIDParam(request)
 	if err != nil {
-		app.notFoundResponse(writer, request)
+		_errors.NotFound(writer, request)
 		return
 	}
 
@@ -125,9 +126,9 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
-			app.notFoundResponse(writer, request)
+			_errors.NotFound(writer, request)
 		default:
-			app.serverErrorResponse(writer, request, err)
+			_errors.ServerError(writer, request, err)
 		}
 		return
 	}
@@ -136,7 +137,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 
 	err = app.readJSON(writer, request, &input)
 	if err != nil {
-		app.badRequestResponse(writer, request, err)
+		_errors.BadRequest(writer, request, err)
 		return
 	}
 
@@ -158,7 +159,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 	v := validator.New()
 
 	if database.ValidateMovie(v, movie); !v.Valid() {
-		app.failedValidationResponse(writer, request, v.Errors)
+		_errors.LegacyFailedValidation(writer, request, v.Errors)
 		return
 	}
 
@@ -166,16 +167,16 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrEditConflict):
-			app.editConflictResponse(writer, request)
+			_errors.EditConflict(writer, request)
 		default:
-			app.serverErrorResponse(writer, request, err)
+			_errors.ServerError(writer, request, err)
 		}
 		return
 	}
 
 	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 	}
 }
 
@@ -191,7 +192,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	id, err := app.readIDParam(request)
 	if err != nil {
-		app.notFoundResponse(writer, request)
+		_errors.NotFound(writer, request)
 		return
 	}
 
@@ -199,16 +200,16 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
-			app.notFoundResponse(writer, request)
+			_errors.NotFound(writer, request)
 		default:
-			app.serverErrorResponse(writer, request, err)
+			_errors.ServerError(writer, request, err)
 		}
 		return
 	}
 
 	err = app.writeJSON(writer, http.StatusOK, envelope{"message": "movie successfully deleted"}, nil)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 	}
 }
 
@@ -247,18 +248,18 @@ func (app *application) listMoviesHandler(writer http.ResponseWriter, request *h
 	input.Filters.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
 
 	if database.ValidateFilters(v, input.Filters); !v.Valid() {
-		app.failedValidationResponse(writer, request, v.Errors)
+		_errors.LegacyFailedValidation(writer, request, v.Errors)
 		return
 	}
 
 	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 		return
 	}
 
 	err = app.writeJSON(writer, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		_errors.ServerError(writer, request, err)
 	}
 }

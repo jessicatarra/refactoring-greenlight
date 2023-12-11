@@ -5,29 +5,30 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/config"
-	"github.com/jessicatarra/greenlight/internal/jsonlog"
+	"log/slog"
 	"net/http"
+	"os"
 	"sync"
 	"time"
 )
 
 type module struct {
 	server *http.Server
-	logger *jsonlog.Logger
+	logger *slog.Logger
 }
 
 func (m module) Start(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		m.logger.PrintInfo("Starting Module1 server", map[string]string{"module": "legacy", "addr": m.server.Addr})
+		m.logger.Info("Starting Legacy Module server", slog.Group("server", "addr", m.server.Addr))
 		err := m.server.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
-			m.logger.PrintFatal(err, map[string]string{
-				"error": "legacy module encountered an error",
-			})
+			m.logger.Info("legacy module encountered an error")
+
+			os.Exit(1)
 		}
-		m.logger.PrintInfo("Stopped Module server", map[string]string{"module": "legacy", "addr": m.server.Addr})
+		m.logger.Info("Stopped legacy Module server", slog.Group("server", "addr", m.server.Addr))
 
 	}()
 }
@@ -47,7 +48,7 @@ const (
 	defaultWriteTimeout = 10 * time.Second
 )
 
-func NewModule(cfg config.Config, routes http.Handler, logger *jsonlog.Logger) *module {
+func NewModule(cfg config.Config, routes http.Handler, logger *slog.Logger) *module {
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.Port),
 		Handler:      routes,

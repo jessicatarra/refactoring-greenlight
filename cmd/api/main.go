@@ -5,18 +5,19 @@ import (
 	"expvar"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/database"
-	"github.com/jessicatarra/greenlight/internal/jsonlog"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	_auth "github.com/jessicatarra/greenlight/ms/auth"
+	"log/slog"
 	"os"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
 )
 
 type application struct {
 	config config.Config
-	logger *jsonlog.Logger
+	logger *slog.Logger
 	models database.Models
 	mailer mailer.Mailer
 	wg     sync.WaitGroup
@@ -32,19 +33,27 @@ type application struct {
 // @in header
 // @name Authorization
 func main() {
-	logger := jsonlog.New(os.Stdout, jsonlog.LevelInfo)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 
+	err := run(logger)
+	if err != nil {
+		trace := string(debug.Stack())
+		logger.Error(err.Error(), "trace", trace)
+		os.Exit(1)
+	}
+}
+
+func run(logger *slog.Logger) error {
 	cfg, err := config.Init()
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		return err
 	}
 
 	db, err := database.New(cfg.DB.Dsn, cfg.DB.MaxOpenConns, cfg.DB.MaxIdleConns, cfg.DB.MaxIdleTime, true)
 	if err != nil {
-		logger.PrintFatal(err, nil)
+		return err
 	}
 	defer db.Close()
-	logger.PrintInfo("database connection pool established", nil)
 
 	initMetrics(db)
 
@@ -53,13 +62,9 @@ func main() {
 	monolith := NewModularMonolith(&app.wg)
 
 	monolith.AddModule(NewModule(cfg, app.routes(), app.logger))
-	monolith.AddModule(_auth.NewModule(db, cfg, &app.wg))
+	monolith.AddModule(_auth.NewModule(db, cfg, &app.wg, app.logger))
 
-	err = monolith.Run()
-	if err != nil {
-		logger.PrintFatal(err, nil)
-		return
-	}
+	return monolith.Run()
 }
 
 func initMetrics(db *sql.DB) {
@@ -78,7 +83,7 @@ func initMetrics(db *sql.DB) {
 	}))
 }
 
-func newLegacyApplication(cfg config.Config, logger *jsonlog.Logger, db *sql.DB) *application {
+func newLegacyApplication(cfg config.Config, logger *slog.Logger, db *sql.DB) *application {
 	return &application{
 		config: cfg,
 		logger: logger,

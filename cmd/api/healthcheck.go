@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/jessicatarra/greenlight/internal/config"
+	"github.com/jessicatarra/greenlight/internal/errors"
 	"net/http"
 )
 
@@ -16,6 +17,6 @@ func (app *application) healthcheckHandler(writer http.ResponseWriter, request *
 	}
 	err := app.writeJSON(writer, http.StatusOK, env, nil)
 	if err != nil {
-		app.serverErrorResponse(writer, request, err)
+		errors.ServerError(writer, request, err)
 	}
 }

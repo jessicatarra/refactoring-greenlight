@@ -3,6 +3,7 @@ package main
 import (
 	"expvar"
 	_ "github.com/jessicatarra/greenlight/docs"
+	"github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/middleware"
 	"github.com/julienschmidt/httprouter"
 	httpSwagger "github.com/swaggo/http-swagger"
@@ -12,9 +13,9 @@ import (
 func (app *application) routes() http.Handler {
 	router := httprouter.New()
 
-	router.NotFound = http.HandlerFunc(app.notFoundResponse)
+	router.NotFound = http.HandlerFunc(errors.NotFound)
 
-	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
+	router.MethodNotAllowed = http.HandlerFunc(errors.MethodNotAllowed)
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
 
@@ -28,7 +29,7 @@ func (app *application) routes() http.Handler {
 
 	router.Handler(http.MethodGet, "/swagger/:any", httpSwagger.WrapHandler)
 
-	m := middleware.NewSharedMiddleware(&app.config)
+	m := middleware.NewSharedMiddleware(&app.config, app.logger)
 
-	return m.RecoverPanic(m.RateLimit(m.EnableCORS(app.authenticate(app.logRequest(router)))))
+	return m.RecoverPanic(m.RateLimit(m.EnableCORS(app.authenticate(m.LogRequest(router)))))
 }

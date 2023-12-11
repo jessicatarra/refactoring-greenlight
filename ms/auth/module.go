@@ -29,11 +29,11 @@ func (m module) Start(wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		m.logger.Info("Starting Module1 server", slog.Group("server", "addr", m.server.Addr))
+		m.logger.Info("Starting Auth Module server", slog.Group("server", "addr", m.server.Addr))
 
 		err := m.server.ListenAndServe()
 		if !errors.Is(err, http.ErrServerClosed) {
-			m.logger.Info("module 1 encountered an error")
+			m.logger.Info("Auth module encountered an error")
 
 			os.Exit(1)
 		}
@@ -51,9 +51,7 @@ func (m module) Shutdown(ctx context.Context, cancel func()) {
 	}
 }
 
-func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup) *module {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
-
+func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.Logger) *module {
 	service := _service.NewService(db, cfg, wg, logger)
 
 	srv := &http.Server{

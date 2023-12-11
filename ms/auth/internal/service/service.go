@@ -12,7 +12,6 @@ import (
 
 type Service interface {
 	Routes() http.Handler
-	logRequestMiddleware(next http.Handler) http.Handler
 	Handlers(appl domain.Appl, router *httprouter.Router)
 }
 

@@ -1,6 +1,7 @@
 package errors
 
 import (
+	"fmt"
 	"github.com/jessicatarra/greenlight/internal/response"
 	"github.com/jessicatarra/greenlight/internal/utils/validator"
 	"log/slog"
@@ -53,15 +54,15 @@ func RateLimitExceeded(w http.ResponseWriter, r *http.Request) {
 	errorMessage(w, r, http.StatusTooManyRequests, message, nil)
 }
 
-//func notFound(w http.ResponseWriter, r *http.Request) {
-//	message := "The requested resource could not be found"
-//	errorMessage(w, r, http.StatusNotFound, message, nil)
-//}
+func NotFound(w http.ResponseWriter, r *http.Request) {
+	message := "The requested resource could not be found"
+	errorMessage(w, r, http.StatusNotFound, message, nil)
+}
 
-//func methodNotAllowed(w http.ResponseWriter, r *http.Request) {
-//	message := fmt.Sprintf("The %s method is not supported for this resource", r.Method)
-//	errorMessage(w, r, http.StatusMethodNotAllowed, message, nil)
-//}
+func MethodNotAllowed(w http.ResponseWriter, r *http.Request) {
+	message := fmt.Sprintf("The %s method is not supported for this resource", r.Method)
+	errorMessage(w, r, http.StatusMethodNotAllowed, message, nil)
+}
 
 func BadRequest(w http.ResponseWriter, r *http.Request, err error) {
 	errorMessage(w, r, http.StatusBadRequest, err.Error(), nil)
@@ -81,15 +82,37 @@ func InvalidAuthenticationToken(w http.ResponseWriter, r *http.Request) {
 	errorMessage(w, r, http.StatusUnauthorized, "Invalid authentication token", headers)
 }
 
-//func authenticationRequired(w http.ResponseWriter, r *http.Request) {
-//	errorMessage(w, r, http.StatusUnauthorized, "You must be authenticated to access this resource", nil)
-//}
+func AuthenticationRequired(w http.ResponseWriter, r *http.Request) {
+	errorMessage(w, r, http.StatusUnauthorized, "You must be authenticated to access this resource", nil)
+}
 
-//
-//func basicAuthenticationRequired(w http.ResponseWriter, r *http.Request) {
-//	headers := make(http.Header)
-//	headers.Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-//
-//	message := "You must be authenticated to access this resource"
-//	errorMessage(w, r, http.StatusUnauthorized, message, headers)
-//}
+func InactiveAccount(writer http.ResponseWriter, request *http.Request) {
+	message := "your user account must be activated to access this resource"
+	errorMessage(writer, request, http.StatusForbidden, message, nil)
+}
+
+func NotPermitted(writer http.ResponseWriter, request *http.Request) {
+	message := "your user account doesn't have the necessary permissions to access this resource"
+	errorMessage(writer, request, http.StatusForbidden, message, nil)
+}
+
+func LegacyFailedValidation(writer http.ResponseWriter, request *http.Request, errors map[string]string) {
+	legacyErrorMessage(writer, request, http.StatusUnprocessableEntity, errors)
+}
+
+func EditConflict(writer http.ResponseWriter, request *http.Request) {
+	message := "unable to update the record due to an edit conflict, please try again"
+	errorMessage(writer, request, http.StatusConflict, message, nil)
+}
+
+func legacyErrorMessage(writer http.ResponseWriter, request *http.Request, status int, message interface{}) {
+	type envelope map[string]interface{}
+
+	env := envelope{"error": message}
+
+	err := response.JSONWithHeaders(writer, status, env, nil)
+	if err != nil {
+		ReportServerError(request, err)
+		writer.WriteHeader(500)
+	}
+}

@@ -5,6 +5,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/errors"
 	"golang.org/x/time/rate"
+	"log/slog"
 	"net/http"
 )
 
@@ -12,14 +13,16 @@ type Middleware interface {
 	RecoverPanic(next http.Handler) http.Handler
 	RateLimit(next http.Handler) http.Handler
 	EnableCORS(next http.Handler) http.Handler
+	LogRequest(next http.Handler) http.Handler
 }
 
 type middleware struct {
-	cfg *config.Config
+	cfg    *config.Config
+	logger *slog.Logger
 }
 
-func NewSharedMiddleware(cfg *config.Config) Middleware {
-	return &middleware{cfg: cfg}
+func NewSharedMiddleware(cfg *config.Config, logger *slog.Logger) Middleware {
+	return &middleware{cfg: cfg, logger: logger}
 }
 
 func (m *middleware) RecoverPanic(next http.Handler) http.Handler {
@@ -75,6 +78,19 @@ func (m *middleware) EnableCORS(next http.Handler) http.Handler {
 				}
 			}
 		}
+
+		next.ServeHTTP(writer, request)
+	})
+}
+
+func (m *middleware) LogRequest(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		m.logger.Info("request", slog.Group("properties",
+			"request_remote_addr", request.RemoteAddr,
+			"request_proto", request.Proto,
+			"request_method", request.Method,
+			"request_url_request_uri", request.URL.RequestURI()),
+		)
 
 		next.ServeHTTP(writer, request)
 	})
