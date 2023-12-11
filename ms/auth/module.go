@@ -5,13 +5,18 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	pb "github.com/jessicatarra/greenlight/api/proto"
 	"github.com/jessicatarra/greenlight/internal/config"
 	appl "github.com/jessicatarra/greenlight/ms/auth/internal/application"
+	_grpc "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/grpc"
 	_http "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/http"
 	repo "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
+	"google.golang.org/grpc"
 	"log/slog"
+	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -23,12 +28,13 @@ const (
 )
 
 type module struct {
+	grpc   *grpc.Server
 	server *http.Server
 	logger *slog.Logger
 }
 
 func (m module) Start(wg *sync.WaitGroup) {
-	wg.Add(1)
+	wg.Add(2)
 	go func() {
 		defer wg.Done()
 		m.logger.Info("Starting Auth Module server", slog.Group("server", "addr", m.server.Addr))
@@ -42,23 +48,38 @@ func (m module) Start(wg *sync.WaitGroup) {
 		m.logger.Info("Stopped auth Module server", slog.Group("server", "addr", m.server.Addr))
 
 	}()
+
+	go func() {
+		defer wg.Done()
+		lis, _ := net.Listen("tcp", strconv.Itoa(8083))
+		err := m.grpc.Serve(lis)
+		if err != nil {
+			m.logger.Info("Auth module encountered an error")
+			os.Exit(1)
+		}
+	}()
 }
 
 func (m module) Shutdown(ctx context.Context, cancel func()) {
 	defer cancel()
 
+	m.grpc.GracefulStop()
 	err := m.server.Shutdown(ctx)
 	if err != nil {
 		return
 	}
+
 }
 
 func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.Logger) *module {
 	userRepo := repo.NewUserRepo(db)
 	tokenRepo := repo.NewTokenRepo(db)
 	permissionRepo := repo.NewPermissionRepo(db)
-	app := appl.NewAppl(userRepo, tokenRepo, permissionRepo, wg, cfg)
-	api := _http.NewService(app, cfg, logger)
+	appl := appl.NewAppl(userRepo, tokenRepo, permissionRepo, wg, cfg)
+	api := _http.NewService(appl, cfg, logger)
+
+	grpcServer := grpc.NewServer()
+	pb.RegisterMyServiceServer(grpcServer, _grpc.NewGRPCServer(appl))
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 8082),
@@ -69,5 +90,5 @@ func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.L
 		WriteTimeout: defaultWriteTimeout,
 	}
 
-	return &module{server: srv, logger: logger}
+	return &module{grpc: grpcServer, server: srv, logger: logger}
 }
