@@ -116,6 +116,46 @@ func (_m *Appl) GetByEmailUseCase(email string) (*domain.User, error) {
 	return r0, r1
 }
 
+// UserPermissionUseCase provides a mock function with given fields: code, userID
+func (_m *Appl) UserPermissionUseCase(code string, userID int64) error {
+	ret := _m.Called(code, userID)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, int64) error); ok {
+		r0 = rf(code, userID)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// ValidateAuthTokenUseCase provides a mock function with given fields: token
+func (_m *Appl) ValidateAuthTokenUseCase(token string) (*domain.User, error) {
+	ret := _m.Called(token)
+
+	var r0 *domain.User
+	var r1 error
+	if rf, ok := ret.Get(0).(func(string) (*domain.User, error)); ok {
+		return rf(token)
+	}
+	if rf, ok := ret.Get(0).(func(string) *domain.User); ok {
+		r0 = rf(token)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(*domain.User)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(token)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // NewAppl creates a new instance of Appl. It also registers a testing interface on the mock and a cleanup function to assert the mocks expectations.
 // The first argument is typically a *testing.T value.
 func NewAppl(t interface {

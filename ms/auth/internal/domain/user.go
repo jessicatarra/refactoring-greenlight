@@ -22,11 +22,19 @@ type CreateUserRequest struct {
 	Validator validator.Validator `json:"-"`
 }
 
+var AnonymousUser = &User{}
+
+func (u *User) IsAnonymous() bool {
+	return u == AnonymousUser
+}
+
 type Appl interface {
 	CreateUseCase(input CreateUserRequest, hashedPassword string) (*User, error)
 	ActivateUseCase(tokenPlainText string) (*User, error)
 	GetByEmailUseCase(email string) (*User, error)
 	CreateAuthTokenUseCase(userID int64) ([]byte, error)
+	ValidateAuthTokenUseCase(token string) (*User, error)
+	UserPermissionUseCase(code string, userID int64) error
 }
 
 type UserRepository interface {

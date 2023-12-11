@@ -13,6 +13,7 @@ import (
 type Service interface {
 	Routes() http.Handler
 	Handlers(appl domain.Appl, router *httprouter.Router)
+	Middlewares(appl domain.Appl, cfg *config.Config) Middlewares
 }
 
 type service struct {

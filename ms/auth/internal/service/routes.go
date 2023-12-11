@@ -11,9 +11,13 @@ import (
 func (s service) Routes() http.Handler {
 	router := httprouter.New()
 
-	s.Handlers(appl.NewAppl(repo.NewUserRepo(s.db), repo.NewTokenRepo(s.db), repo.NewPermissionRepo(s.db), s.wg, s.cfg), router)
+	newAppl := appl.NewAppl(repo.NewUserRepo(s.db), repo.NewTokenRepo(s.db), repo.NewPermissionRepo(s.db), s.wg, s.cfg)
+
+	s.Handlers(newAppl, router)
 
 	m := middleware.NewSharedMiddleware(&s.cfg, s.logger)
+
+	s.Middlewares(newAppl, &s.cfg)
 
 	return m.RecoverPanic(m.RateLimit(m.EnableCORS(m.LogRequest(router))))
 }
