@@ -1,33 +1,29 @@
 package service
 
 import (
-	"database/sql"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/julienschmidt/httprouter"
 	"log/slog"
 	"net/http"
-	"sync"
 )
 
 type Service interface {
 	Routes() http.Handler
-	Handlers(appl domain.Appl, router *httprouter.Router)
-	Middlewares(appl domain.Appl, cfg *config.Config) Middlewares
+	Handlers(router *httprouter.Router)
+	Middlewares() Middlewares
 }
 
 type service struct {
-	db     *sql.DB
+	appl   domain.Appl
 	cfg    config.Config
-	wg     *sync.WaitGroup
 	logger *slog.Logger
 }
 
-func NewService(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.Logger) Service {
+func NewService(appl domain.Appl, cfg config.Config, logger *slog.Logger) Service {
 	return &service{
-		db:     db,
+		appl:   appl,
 		cfg:    cfg,
-		wg:     wg,
 		logger: logger,
 	}
 }

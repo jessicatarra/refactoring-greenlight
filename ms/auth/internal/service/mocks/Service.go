@@ -3,13 +3,9 @@
 package mocks
 
 import (
-	config "github.com/jessicatarra/greenlight/internal/config"
-	domain "github.com/jessicatarra/greenlight/ms/auth/internal/domain"
-
 	http "net/http"
 
 	httprouter "github.com/julienschmidt/httprouter"
-
 	mock "github.com/stretchr/testify/mock"
 
 	service "github.com/jessicatarra/greenlight/ms/auth/internal/service"
@@ -20,18 +16,18 @@ type Service struct {
 	mock.Mock
 }
 
-// Handlers provides a mock function with given fields: appl, router
-func (_m *Service) Handlers(appl domain.Appl, router *httprouter.Router) {
-	_m.Called(appl, router)
+// Handlers provides a mock function with given fields: router
+func (_m *Service) Handlers(router *httprouter.Router) {
+	_m.Called(router)
 }
 
-// Middlewares provides a mock function with given fields: appl, cfg
-func (_m *Service) Middlewares(appl domain.Appl, cfg *config.Config) service.Middlewares {
-	ret := _m.Called(appl, cfg)
+// Middlewares provides a mock function with given fields:
+func (_m *Service) Middlewares() service.Middlewares {
+	ret := _m.Called()
 
 	var r0 service.Middlewares
-	if rf, ok := ret.Get(0).(func(domain.Appl, *config.Config) service.Middlewares); ok {
-		r0 = rf(appl, cfg)
+	if rf, ok := ret.Get(0).(func() service.Middlewares); ok {
+		r0 = rf()
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(service.Middlewares)

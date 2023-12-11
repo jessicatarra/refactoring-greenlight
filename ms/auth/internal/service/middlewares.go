@@ -81,9 +81,9 @@ func (m middlewares) requirePermission(code string, next http.HandlerFunc) http.
 	return m.requireActivatedUser(fn)
 }
 
-func (s service) Middlewares(appl domain.Appl, cfg *config.Config) Middlewares {
+func (s service) Middlewares() Middlewares {
 	return &middlewares{
-		appl: appl,
-		cfg:  cfg,
+		appl: s.appl,
+		cfg:  &s.cfg,
 	}
 }

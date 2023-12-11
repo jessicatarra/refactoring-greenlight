@@ -6,6 +6,8 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/config"
+	appl "github.com/jessicatarra/greenlight/ms/auth/internal/application"
+	repo "github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
 	_service "github.com/jessicatarra/greenlight/ms/auth/internal/service"
 	"log/slog"
 	"net/http"
@@ -52,7 +54,11 @@ func (m module) Shutdown(ctx context.Context, cancel func()) {
 }
 
 func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.Logger) *module {
-	service := _service.NewService(db, cfg, wg, logger)
+	userRepo := repo.NewUserRepo(db)
+	tokenRepo := repo.NewTokenRepo(db)
+	permissionRepo := repo.NewPermissionRepo(db)
+	app := appl.NewAppl(userRepo, tokenRepo, permissionRepo, wg, cfg)
+	service := _service.NewService(app, cfg, logger)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 8082),

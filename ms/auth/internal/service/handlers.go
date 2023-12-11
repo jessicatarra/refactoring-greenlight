@@ -26,8 +26,8 @@ type handlers struct {
 	helpers helpers.Helpers
 }
 
-func (s service) Handlers(appl domain.Appl, router *httprouter.Router) {
-	res := registerHandlers(appl)
+func (s service) Handlers(router *httprouter.Router) {
+	res := registerHandlers(s.appl)
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.createUser)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activateUser)
