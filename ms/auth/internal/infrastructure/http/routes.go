@@ -1,4 +1,4 @@
-package service
+package http
 
 import (
 	"github.com/jessicatarra/greenlight/internal/middleware"

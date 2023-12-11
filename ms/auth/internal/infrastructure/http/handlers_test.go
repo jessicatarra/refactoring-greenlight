@@ -1,7 +1,7 @@
 //go:build auth
 // +build auth
 
-package service
+package http
 
 import (
 	"bytes"

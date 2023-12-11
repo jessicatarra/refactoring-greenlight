@@ -5,7 +5,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
-	"github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
 	"github.com/pascaldekloe/jwt"
 	"strconv"
 	"sync"

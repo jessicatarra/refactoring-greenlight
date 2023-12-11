@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/jessicatarra/greenlight/internal/config"
 	appl "github.com/jessicatarra/greenlight/ms/auth/internal/application"
-	repo "github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
-	_service "github.com/jessicatarra/greenlight/ms/auth/internal/service"
+	_http "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/http"
+	repo "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
 	"log/slog"
 	"net/http"
 	"os"
@@ -58,11 +58,11 @@ func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.L
 	tokenRepo := repo.NewTokenRepo(db)
 	permissionRepo := repo.NewPermissionRepo(db)
 	app := appl.NewAppl(userRepo, tokenRepo, permissionRepo, wg, cfg)
-	service := _service.NewService(app, cfg, logger)
+	api := _http.NewService(app, cfg, logger)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 8082),
-		Handler:      service.Routes(),
+		Handler:      api.Routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 		IdleTimeout:  defaultIdleTimeout,
 		ReadTimeout:  defaultReadTimeout,
