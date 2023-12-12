@@ -31,16 +31,16 @@ func (a *application) authenticate(next http.Handler) http.Handler {
 					_errors.ServerError(w, r, err)
 					return
 				}
-				createdAt := time.Unix(user.CreatedAt.Seconds, int64(user.CreatedAt.Nanos))
 				if user != nil {
+					createdAt := time.Unix(user.CreatedAt.Seconds, int64(user.CreatedAt.Nanos))
 					r = a.contextSetUser(r, &database.User{
-						ID:        user.Id,
-						CreatedAt: createdAt,
-						Name:      user.Name,
-						Email:     user.Email,
-						//Password:  user.HashedPassword,
-						Activated: user.Activated,
-						Version:   int(user.Version),
+						ID:             user.Id,
+						CreatedAt:      createdAt,
+						Name:           user.Name,
+						Email:          user.Email,
+						HashedPassword: user.HashedPassword,
+						Activated:      user.Activated,
+						Version:        int(user.Version),
 					})
 				}
 			}
