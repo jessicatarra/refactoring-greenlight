@@ -15,7 +15,7 @@ import (
 
 type envelope map[string]interface{}
 
-func (app *application) readIDParam(request *http.Request) (int64, error) {
+func (a *application) readIDParam(request *http.Request) (int64, error) {
 	params := httprouter.ParamsFromContext(request.Context())
 
 	id, err := strconv.ParseInt(params.ByName("id"), 10, 64)
@@ -26,7 +26,7 @@ func (app *application) readIDParam(request *http.Request) (int64, error) {
 	return id, nil
 }
 
-func (app *application) writeJSON(writer http.ResponseWriter, status int, data interface{}, headers http.Header) error {
+func (a *application) writeJSON(writer http.ResponseWriter, status int, data interface{}, headers http.Header) error {
 	json, err := json.MarshalIndent(data, "", "\t")
 	if err != nil {
 		return err
@@ -44,7 +44,7 @@ func (app *application) writeJSON(writer http.ResponseWriter, status int, data i
 	return nil
 }
 
-func (app *application) readJSON(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
+func (a *application) readJSON(writer http.ResponseWriter, request *http.Request, dst interface{}) error {
 	maxBytes := 1_048_576
 	request.Body = http.MaxBytesReader(writer, request.Body, int64(maxBytes))
 	dec := json.NewDecoder(request.Body)
@@ -88,7 +88,7 @@ func (app *application) readJSON(writer http.ResponseWriter, request *http.Reque
 	return nil
 }
 
-func (app *application) readString(qs url.Values, key string, defaultValue string) string {
+func (a *application) readString(qs url.Values, key string, defaultValue string) string {
 	s := qs.Get(key)
 
 	if s == "" {
@@ -98,7 +98,7 @@ func (app *application) readString(qs url.Values, key string, defaultValue strin
 	return s
 }
 
-func (app *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
+func (a *application) readCSV(qs url.Values, key string, defaultValue []string) []string {
 	csv := qs.Get(key)
 
 	if csv == "" {
@@ -108,7 +108,7 @@ func (app *application) readCSV(qs url.Values, key string, defaultValue []string
 	return strings.Split(csv, ",")
 }
 
-func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+func (a *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
 	s := qs.Get(key)
 
 	if s == "" {

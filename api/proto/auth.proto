@@ -1,0 +1,32 @@
+syntax="proto3";
+
+package proto;
+
+import public "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/jessicatarra/greenlight/api/proto";
+
+message User {
+  int64 id = 1;
+  google.protobuf.Timestamp created_at = 2;
+  string name = 3;
+  string email = 4;
+  string hashed_password = 5;
+  bool activated = 6;
+  int32 version = 7;
+}
+
+service AuthGRPCService {
+  rpc ValidateAuthToken(ValidateAuthTokenRequest) returns (User);
+  rpc UserPermission(UserPermissionRequest) returns (google.protobuf.Empty);
+}
+
+message ValidateAuthTokenRequest {
+  string token = 1;
+}
+
+message UserPermissionRequest {
+  string code = 1;
+  int64 user_id = 2;
+}

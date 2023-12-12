@@ -5,7 +5,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
-	"github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
 	"github.com/pascaldekloe/jwt"
 	"strconv"
 	"sync"
@@ -115,4 +115,49 @@ func (a *appl) CreateAuthTokenUseCase(userID int64) ([]byte, error) {
 	}
 
 	return jwtBytes, nil
+}
+
+func (a *appl) ValidateAuthTokenUseCase(token string) (*domain.User, error) {
+	claims, err := jwt.HMACCheck([]byte(token), []byte(a.cfg.Jwt.Secret))
+	if err != nil {
+		return nil, err
+	}
+
+	if !claims.Valid(time.Now()) {
+		return nil, err
+	}
+
+	if claims.Issuer != a.cfg.BaseURL {
+		return nil, err
+
+	}
+
+	if !claims.AcceptAudience(a.cfg.BaseURL) {
+		return nil, err
+
+	}
+
+	userID, err := strconv.Atoi(claims.Subject)
+	if err != nil {
+		return nil, err
+	}
+
+	user, err := a.userRepo.GetUserById(int64(userID))
+	if err != nil {
+		return nil, err
+	}
+
+	return user, nil
+}
+
+func (a *appl) UserPermissionUseCase(code string, userID int64) error {
+	permissions, err := a.permissionRepo.GetAllForUser(userID)
+	if err != nil {
+		return err
+	}
+	if !permissions.Include(code) {
+		return domain.ErrPermissionNotIncluded
+	}
+
+	return nil
 }

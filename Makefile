@@ -44,7 +44,7 @@ generate/api/docs:
 	@echo 'Remove docs...'
 	rm -rf docs
 	@echo 'Generate updated docs folder'
-	swag init -d cmd/api,ms/auth/internal/service --parseDependency --parseInternal --parseDepth 2
+	swag init -d cmd/api,ms/auth/internal/ --parseDependency --parseInternal --parseDepth 2
 
 
 .PHONY: generate/auth/mocks

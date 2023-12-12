@@ -6,16 +6,16 @@ import (
 	"net/http"
 )
 
-func (app *application) healthcheckHandler(writer http.ResponseWriter, request *http.Request) {
+func (a *application) healthcheckHandler(writer http.ResponseWriter, request *http.Request) {
 	env := envelope{
 		"status": "available",
 		"system_info": map[string]string{
 			"status":      "available",
-			"environment": app.config.Env,
+			"environment": a.config.Env,
 			"version":     config.Version,
 		},
 	}
-	err := app.writeJSON(writer, http.StatusOK, env, nil)
+	err := a.writeJSON(writer, http.StatusOK, env, nil)
 	if err != nil {
 		errors.ServerError(writer, request, err)
 	}

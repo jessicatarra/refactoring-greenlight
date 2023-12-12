@@ -9,7 +9,7 @@ import (
 	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain/mocks"
-	"github.com/jessicatarra/greenlight/ms/auth/internal/repositories"
+	"github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"sync"
