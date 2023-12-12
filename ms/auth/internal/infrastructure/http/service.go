@@ -11,7 +11,6 @@ import (
 type Service interface {
 	Routes() http.Handler
 	Handlers(router *httprouter.Router)
-	Middlewares() Middlewares
 }
 
 type service struct {
