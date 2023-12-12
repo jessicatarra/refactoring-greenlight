@@ -13,12 +13,6 @@ type Service interface {
 	UserPermission(ctx context.Context, request *pb.UserPermissionRequest) (*empty.Empty, error)
 }
 
-//
-//func (s Service) mustEmbedUnimplementedAuthGRPCServiceServer() {
-//	//TODO implement me
-//	panic("implement me")
-//}
-
 type Server struct {
 	Appl domain.Appl
 	pb.UnimplementedAuthGRPCServiceServer
