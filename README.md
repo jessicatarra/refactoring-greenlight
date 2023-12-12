@@ -4,10 +4,8 @@
 
 This project aims to refactor the Greenlight application by implementing clean architecture and SOLID principles. The goal is to improve the codebase's maintainability, scalability, and testability while increasing test coverage.
 
-To understand the initial state of the project, please refer to the [previous README file](https://github.com/jessicatarra/greenlight/blob/main/README.md).
+To understand the initial state of the project, please refer to the [previous README file](https://github.com/jessicatarra/greenlight/blob/main/README.md) or check the [API Docs](https://greenlight.tarralva.com/swagger/index.html) from V1 application version.
 
-### API Docs from V1 application version
-https://greenlight.tarralva.com/swagger/index.html
 
 ### Diagram
 ```mermaid
@@ -70,7 +68,7 @@ The diagram represents the initial phase of the refactor process, focusing on se
 
 - https://github.com/golang-standards/project-layout
 - https://autostrada.dev/
-- https://github.com/qiangxue/go-rest-api/tree/
+- https://github.com/qiangxue/go-rest-api/
 - https://github.com/powerman/go-service-example/
 - https://github.com/powerman/go-monolith-example
 - https://github.com/amitshekhariitbhu/go-backend-clean-architecture
