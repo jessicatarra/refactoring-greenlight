@@ -12,11 +12,11 @@ import (
 	_http "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/http"
 	repo "github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
 	"google.golang.org/grpc"
+	"log"
 	"log/slog"
 	"net"
 	"net/http"
 	"os"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -51,12 +51,17 @@ func (m module) Start(wg *sync.WaitGroup) {
 
 	go func() {
 		defer wg.Done()
-		lis, _ := net.Listen("tcp", strconv.Itoa(8083))
-		err := m.grpc.Serve(lis)
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 50051))
 		if err != nil {
+			log.Fatalf("failed to listen: %v", err)
+		}
+
+		m.logger.Info("Starting Auth Module GRPC server", slog.Group("server", "addr", lis.Addr()))
+		if err := m.grpc.Serve(lis); err != nil {
 			m.logger.Info("Auth module encountered an error")
 			os.Exit(1)
 		}
+		m.logger.Info("Stopped auth Module GRPC server", slog.Group("server", "addr", lis.Addr()))
 	}()
 }
 
@@ -79,7 +84,7 @@ func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.L
 	api := _http.NewService(appl, cfg, logger)
 
 	grpcServer := grpc.NewServer()
-	pb.RegisterMyServiceServer(grpcServer, _grpc.NewGRPCServer(appl))
+	pb.RegisterAuthGRPCServiceServer(grpcServer, _grpc.NewGRPCServer(appl))
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", 8082),

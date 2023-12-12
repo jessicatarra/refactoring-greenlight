@@ -14,7 +14,6 @@ import (
 	"os"
 	"runtime"
 	"runtime/debug"
-	"strconv"
 	"sync"
 	"time"
 )
@@ -25,7 +24,7 @@ type application struct {
 	models     database.Models
 	mailer     mailer.Mailer
 	wg         sync.WaitGroup
-	grpcClient pb.MyServiceClient
+	grpcClient pb.AuthGRPCServiceClient
 }
 
 // @title Greenlight API Docs
@@ -61,13 +60,14 @@ func run(logger *slog.Logger) error {
 	defer db.Close()
 
 	initMetrics(db)
-	grpcConn, err := grpc.Dial(strconv.Itoa(8083), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	grpcConn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
+		logger.Error("did not connect:", err)
 		return err
 	}
 	defer grpcConn.Close()
 
-	grpcClient := pb.NewMyServiceClient(grpcConn)
+	grpcClient := pb.NewAuthGRPCServiceClient(grpcConn)
 
 	app := newLegacyApplication(cfg, logger, db, grpcClient)
 
@@ -95,7 +95,7 @@ func initMetrics(db *sql.DB) {
 	}))
 }
 
-func newLegacyApplication(cfg config.Config, logger *slog.Logger, db *sql.DB, grpcClient pb.MyServiceClient) *application {
+func newLegacyApplication(cfg config.Config, logger *slog.Logger, db *sql.DB, grpcClient pb.AuthGRPCServiceClient) *application {
 	return &application{
 		grpcClient: grpcClient,
 		config:     cfg,

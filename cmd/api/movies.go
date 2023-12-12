@@ -32,10 +32,10 @@ type updateMovieRequest struct {
 // @Param request body createMovieRequest true "Request body"
 // @Success 201 {object} database.Movie "Movie created"
 // @Router /movies [post]
-func (app *application) createMovieHandler(writer http.ResponseWriter, request *http.Request) {
+func (a *application) createMovieHandler(writer http.ResponseWriter, request *http.Request) {
 	input := createMovieRequest{}
 
-	err := app.readJSON(writer, request, &input)
+	err := a.readJSON(writer, request, &input)
 	if err != nil {
 		_errors.BadRequest(writer, request, err)
 		return
@@ -57,7 +57,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 		return
 	}
 
-	err = app.models.Movies.Insert(movie)
+	err = a.models.Movies.Insert(movie)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 		return
@@ -66,7 +66,7 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/movies/%d", movie.ID))
 
-	err = app.writeJSON(writer, http.StatusCreated, envelope{"movie": movie}, headers)
+	err = a.writeJSON(writer, http.StatusCreated, envelope{"movie": movie}, headers)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 	}
@@ -81,14 +81,14 @@ func (app *application) createMovieHandler(writer http.ResponseWriter, request *
 // @Param id path int true "Movie ID"
 // @Success 200 {object} database.Movie "Movie details"
 // @Router /movies/{id} [get]
-func (app *application) showMovieHandler(writer http.ResponseWriter, request *http.Request) {
-	id, err := app.readIDParam(request)
+func (a *application) showMovieHandler(writer http.ResponseWriter, request *http.Request) {
+	id, err := a.readIDParam(request)
 	if err != nil {
 		_errors.NotFound(writer, request)
 		return
 	}
 
-	movie, err := app.models.Movies.Get(id)
+	movie, err := a.models.Movies.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
@@ -99,7 +99,7 @@ func (app *application) showMovieHandler(writer http.ResponseWriter, request *ht
 		return
 	}
 
-	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
+	err = a.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 	}
@@ -115,14 +115,14 @@ func (app *application) showMovieHandler(writer http.ResponseWriter, request *ht
 // @Param request body updateMovieRequest true "Request body"
 // @Success 200 {object} database.Movie "Movie updated"
 // @Router /movies/{id} [put]
-func (app *application) updateMovieHandler(writer http.ResponseWriter, request *http.Request) {
-	id, err := app.readIDParam(request)
+func (a *application) updateMovieHandler(writer http.ResponseWriter, request *http.Request) {
+	id, err := a.readIDParam(request)
 	if err != nil {
 		_errors.NotFound(writer, request)
 		return
 	}
 
-	movie, err := app.models.Movies.Get(id)
+	movie, err := a.models.Movies.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
@@ -135,7 +135,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 
 	input := updateMovieRequest{}
 
-	err = app.readJSON(writer, request, &input)
+	err = a.readJSON(writer, request, &input)
 	if err != nil {
 		_errors.BadRequest(writer, request, err)
 		return
@@ -163,7 +163,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 		return
 	}
 
-	err = app.models.Movies.Update(movie)
+	err = a.models.Movies.Update(movie)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrEditConflict):
@@ -174,7 +174,7 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 		return
 	}
 
-	err = app.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
+	err = a.writeJSON(writer, http.StatusOK, envelope{"movie": movie}, nil)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 	}
@@ -189,14 +189,14 @@ func (app *application) updateMovieHandler(writer http.ResponseWriter, request *
 // @Param id path int true "Movie ID"
 // @Success 200
 // @Router /movies/{id} [delete]
-func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *http.Request) {
-	id, err := app.readIDParam(request)
+func (a *application) deleteMovieHandler(writer http.ResponseWriter, request *http.Request) {
+	id, err := a.readIDParam(request)
 	if err != nil {
 		_errors.NotFound(writer, request)
 		return
 	}
 
-	err = app.models.Movies.Delete(id)
+	err = a.models.Movies.Delete(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, database.ErrRecordNotFound):
@@ -207,7 +207,7 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *
 		return
 	}
 
-	err = app.writeJSON(writer, http.StatusOK, envelope{"message": "movie successfully deleted"}, nil)
+	err = a.writeJSON(writer, http.StatusOK, envelope{"message": "movie successfully deleted"}, nil)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 	}
@@ -226,7 +226,7 @@ func (app *application) deleteMovieHandler(writer http.ResponseWriter, request *
 // @Param sort query string false "Sort order"
 // @Success 200 {object} []database.Movie "Movie list"
 // @Router /movies [get]
-func (app *application) listMoviesHandler(writer http.ResponseWriter, request *http.Request) {
+func (a *application) listMoviesHandler(writer http.ResponseWriter, request *http.Request) {
 	var input struct {
 		Title  string
 		Genres []string
@@ -237,13 +237,13 @@ func (app *application) listMoviesHandler(writer http.ResponseWriter, request *h
 
 	qs := request.URL.Query()
 
-	input.Title = app.readString(qs, "title", "")
-	input.Genres = app.readCSV(qs, "genres", []string{})
+	input.Title = a.readString(qs, "title", "")
+	input.Genres = a.readCSV(qs, "genres", []string{})
 
-	input.Filters.Page = app.readInt(qs, "page", 1, v)
-	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	input.Filters.Page = a.readInt(qs, "page", 1, v)
+	input.Filters.PageSize = a.readInt(qs, "page_size", 20, v)
 
-	input.Filters.Sort = app.readString(qs, "sort", "id")
+	input.Filters.Sort = a.readString(qs, "sort", "id")
 
 	input.Filters.SortSafelist = []string{"id", "title", "year", "runtime", "-id", "-title", "-year", "-runtime"}
 
@@ -252,13 +252,13 @@ func (app *application) listMoviesHandler(writer http.ResponseWriter, request *h
 		return
 	}
 
-	movies, metadata, err := app.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
+	movies, metadata, err := a.models.Movies.GetAll(input.Title, input.Genres, input.Filters)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 		return
 	}
 
-	err = app.writeJSON(writer, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
+	err = a.writeJSON(writer, http.StatusOK, envelope{"movies": movies, "metadata": metadata}, nil)
 	if err != nil {
 		_errors.ServerError(writer, request, err)
 	}

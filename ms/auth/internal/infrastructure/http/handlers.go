@@ -31,6 +31,7 @@ func (s service) Handlers(router *httprouter.Router) {
 
 	router.HandlerFunc(http.MethodPost, "/v1/users", res.createUser)
 	router.HandlerFunc(http.MethodPut, "/v1/users/activated", res.activateUser)
+	router.HandlerFunc(http.MethodPost, "/v1/tokens/authentication", res.createAuthenticationToken)
 }
 
 func registerHandlers(appl domain.Appl) Handlers {

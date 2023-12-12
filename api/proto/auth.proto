@@ -17,7 +17,7 @@ message User {
   int32 version = 7;
 }
 
-service MyService {
+service AuthGRPCService {
   rpc ValidateAuthToken(ValidateAuthTokenRequest) returns (User);
   rpc UserPermission(UserPermissionRequest) returns (google.protobuf.Empty);
 }

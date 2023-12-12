@@ -19,122 +19,122 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// MyServiceClient is the client API for MyService service.
+// AuthGRPCServiceClient is the client API for AuthGRPCService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type MyServiceClient interface {
+type AuthGRPCServiceClient interface {
 	ValidateAuthToken(ctx context.Context, in *ValidateAuthTokenRequest, opts ...grpc.CallOption) (*User, error)
 	UserPermission(ctx context.Context, in *UserPermissionRequest, opts ...grpc.CallOption) (*empty.Empty, error)
 }
 
-type myServiceClient struct {
+type authGRPCServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewMyServiceClient(cc grpc.ClientConnInterface) MyServiceClient {
-	return &myServiceClient{cc}
+func NewAuthGRPCServiceClient(cc grpc.ClientConnInterface) AuthGRPCServiceClient {
+	return &authGRPCServiceClient{cc}
 }
 
-func (c *myServiceClient) ValidateAuthToken(ctx context.Context, in *ValidateAuthTokenRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *authGRPCServiceClient) ValidateAuthToken(ctx context.Context, in *ValidateAuthTokenRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/proto.MyService/ValidateAuthToken", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.AuthGRPCService/ValidateAuthToken", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *myServiceClient) UserPermission(ctx context.Context, in *UserPermissionRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
+func (c *authGRPCServiceClient) UserPermission(ctx context.Context, in *UserPermissionRequest, opts ...grpc.CallOption) (*empty.Empty, error) {
 	out := new(empty.Empty)
-	err := c.cc.Invoke(ctx, "/proto.MyService/UserPermission", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/proto.AuthGRPCService/UserPermission", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// MyServiceServer is the server API for MyService service.
-// All implementations must embed UnimplementedMyServiceServer
+// AuthGRPCServiceServer is the server API for AuthGRPCService service.
+// All implementations must embed UnimplementedAuthGRPCServiceServer
 // for forward compatibility
-type MyServiceServer interface {
+type AuthGRPCServiceServer interface {
 	ValidateAuthToken(context.Context, *ValidateAuthTokenRequest) (*User, error)
 	UserPermission(context.Context, *UserPermissionRequest) (*empty.Empty, error)
-	mustEmbedUnimplementedMyServiceServer()
+	mustEmbedUnimplementedAuthGRPCServiceServer()
 }
 
-// UnimplementedMyServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedMyServiceServer struct {
+// UnimplementedAuthGRPCServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedAuthGRPCServiceServer struct {
 }
 
-func (UnimplementedMyServiceServer) ValidateAuthToken(context.Context, *ValidateAuthTokenRequest) (*User, error) {
+func (UnimplementedAuthGRPCServiceServer) ValidateAuthToken(context.Context, *ValidateAuthTokenRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ValidateAuthToken not implemented")
 }
-func (UnimplementedMyServiceServer) UserPermission(context.Context, *UserPermissionRequest) (*empty.Empty, error) {
+func (UnimplementedAuthGRPCServiceServer) UserPermission(context.Context, *UserPermissionRequest) (*empty.Empty, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UserPermission not implemented")
 }
-func (UnimplementedMyServiceServer) mustEmbedUnimplementedMyServiceServer() {}
+func (UnimplementedAuthGRPCServiceServer) mustEmbedUnimplementedAuthGRPCServiceServer() {}
 
-// UnsafeMyServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to MyServiceServer will
+// UnsafeAuthGRPCServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to AuthGRPCServiceServer will
 // result in compilation errors.
-type UnsafeMyServiceServer interface {
-	mustEmbedUnimplementedMyServiceServer()
+type UnsafeAuthGRPCServiceServer interface {
+	mustEmbedUnimplementedAuthGRPCServiceServer()
 }
 
-func RegisterMyServiceServer(s grpc.ServiceRegistrar, srv MyServiceServer) {
-	s.RegisterService(&MyService_ServiceDesc, srv)
+func RegisterAuthGRPCServiceServer(s grpc.ServiceRegistrar, srv AuthGRPCServiceServer) {
+	s.RegisterService(&AuthGRPCService_ServiceDesc, srv)
 }
 
-func _MyService_ValidateAuthToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthGRPCService_ValidateAuthToken_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ValidateAuthTokenRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MyServiceServer).ValidateAuthToken(ctx, in)
+		return srv.(AuthGRPCServiceServer).ValidateAuthToken(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.MyService/ValidateAuthToken",
+		FullMethod: "/proto.AuthGRPCService/ValidateAuthToken",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyServiceServer).ValidateAuthToken(ctx, req.(*ValidateAuthTokenRequest))
+		return srv.(AuthGRPCServiceServer).ValidateAuthToken(ctx, req.(*ValidateAuthTokenRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _MyService_UserPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AuthGRPCService_UserPermission_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserPermissionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MyServiceServer).UserPermission(ctx, in)
+		return srv.(AuthGRPCServiceServer).UserPermission(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/proto.MyService/UserPermission",
+		FullMethod: "/proto.AuthGRPCService/UserPermission",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MyServiceServer).UserPermission(ctx, req.(*UserPermissionRequest))
+		return srv.(AuthGRPCServiceServer).UserPermission(ctx, req.(*UserPermissionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// MyService_ServiceDesc is the grpc.ServiceDesc for MyService service.
+// AuthGRPCService_ServiceDesc is the grpc.ServiceDesc for AuthGRPCService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var MyService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "proto.MyService",
-	HandlerType: (*MyServiceServer)(nil),
+var AuthGRPCService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "proto.AuthGRPCService",
+	HandlerType: (*AuthGRPCServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "ValidateAuthToken",
-			Handler:    _MyService_ValidateAuthToken_Handler,
+			Handler:    _AuthGRPCService_ValidateAuthToken_Handler,
 		},
 		{
 			MethodName: "UserPermission",
-			Handler:    _MyService_UserPermission_Handler,
+			Handler:    _AuthGRPCService_UserPermission_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

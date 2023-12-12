@@ -1,19 +1,27 @@
 package grpc
 
 import (
+	"context"
+	"github.com/golang/protobuf/ptypes/empty"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	pb "github.com/jessicatarra/greenlight/api/proto"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 )
 
 type Service interface {
-	validateAuthToken(req *pb.ValidateAuthTokenRequest) (*pb.User, error)
-	userPermission(req *pb.UserPermissionRequest) (*pb.Empty, error)
+	ValidateAuthToken(ctx context.Context, request *pb.ValidateAuthTokenRequest) (*pb.User, error)
+	UserPermission(ctx context.Context, request *pb.UserPermissionRequest) (*empty.Empty, error)
 }
+
+//
+//func (s Service) mustEmbedUnimplementedAuthGRPCServiceServer() {
+//	//TODO implement me
+//	panic("implement me")
+//}
 
 type Server struct {
 	Appl domain.Appl
-	pb.UnimplementedMyServiceServer
+	pb.UnimplementedAuthGRPCServiceServer
 }
 
 func NewGRPCServer(appl domain.Appl) *Server {
@@ -22,8 +30,8 @@ func NewGRPCServer(appl domain.Appl) *Server {
 	}
 }
 
-func (g *Server) validateAuthToken(req *pb.ValidateAuthTokenRequest) (*pb.User, error) {
-	user, err := g.Appl.ValidateAuthTokenUseCase(req.Token)
+func (s Server) ValidateAuthToken(ctx context.Context, request *pb.ValidateAuthTokenRequest) (*pb.User, error) {
+	user, err := s.Appl.ValidateAuthTokenUseCase(request.Token)
 	if err != nil {
 		return nil, err
 	}
@@ -48,8 +56,8 @@ func (g *Server) validateAuthToken(req *pb.ValidateAuthTokenRequest) (*pb.User, 
 	}, nil
 }
 
-func (g *Server) userPermission(req *pb.UserPermissionRequest) (*pb.Empty, error) {
-	err := g.Appl.UserPermissionUseCase(req.Code, req.UserId)
+func (s Server) UserPermission(ctx context.Context, request *pb.UserPermissionRequest) (*empty.Empty, error) {
+	err := s.Appl.UserPermissionUseCase(request.Code, request.UserId)
 	if err != nil {
 		return nil, err
 	}
