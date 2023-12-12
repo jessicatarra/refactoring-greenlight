@@ -2,7 +2,6 @@ package http
 
 import (
 	"errors"
-	"github.com/jessicatarra/greenlight/internal/database"
 	_errors "github.com/jessicatarra/greenlight/internal/errors"
 	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/internal/request"
@@ -80,7 +79,7 @@ func (h *handlers) createUser(res http.ResponseWriter, req *http.Request) {
 	user, err := h.appl.CreateUseCase(input, hashedPassword)
 	if err != nil {
 		switch {
-		case errors.Is(err, database.ErrDuplicateEmail):
+		case errors.Is(err, domain.ErrDuplicateEmail):
 			input.Validator.AddError("email a user with this email address already exists")
 			_errors.FailedValidation(res, req, input.Validator)
 		default:
