@@ -2,7 +2,7 @@ syntax="proto3";
 
 package proto;
 
-import "google/protobuf/empty.proto";
+import public "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 option go_package = "github.com/jessicatarra/greenlight/api/proto";

@@ -3,24 +3,29 @@ package main
 import (
 	"database/sql"
 	"expvar"
+	pb "github.com/jessicatarra/greenlight/api/proto"
 	"github.com/jessicatarra/greenlight/internal/config"
 	"github.com/jessicatarra/greenlight/internal/database"
 	"github.com/jessicatarra/greenlight/internal/mailer"
 	_auth "github.com/jessicatarra/greenlight/ms/auth"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
 	"os"
 	"runtime"
 	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 )
 
 type application struct {
-	config config.Config
-	logger *slog.Logger
-	models database.Models
-	mailer mailer.Mailer
-	wg     sync.WaitGroup
+	config     config.Config
+	logger     *slog.Logger
+	models     database.Models
+	mailer     mailer.Mailer
+	wg         sync.WaitGroup
+	grpcClient pb.MyServiceClient
 }
 
 // @title Greenlight API Docs
@@ -56,8 +61,15 @@ func run(logger *slog.Logger) error {
 	defer db.Close()
 
 	initMetrics(db)
+	grpcConn, err := grpc.Dial(strconv.Itoa(8083), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return err
+	}
+	defer grpcConn.Close()
 
-	app := newLegacyApplication(cfg, logger, db)
+	grpcClient := pb.NewMyServiceClient(grpcConn)
+
+	app := newLegacyApplication(cfg, logger, db, grpcClient)
 
 	monolith := NewModularMonolith(&app.wg)
 
@@ -83,11 +95,12 @@ func initMetrics(db *sql.DB) {
 	}))
 }
 
-func newLegacyApplication(cfg config.Config, logger *slog.Logger, db *sql.DB) *application {
+func newLegacyApplication(cfg config.Config, logger *slog.Logger, db *sql.DB, grpcClient pb.MyServiceClient) *application {
 	return &application{
-		config: cfg,
-		logger: logger,
-		models: database.NewModels(db),
-		mailer: mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
+		grpcClient: grpcClient,
+		config:     cfg,
+		logger:     logger,
+		models:     database.NewModels(db),
+		mailer:     mailer.New(cfg.Smtp.Host, cfg.Smtp.Port, cfg.Smtp.Username, cfg.Smtp.Password, cfg.Smtp.From),
 	}
 }
