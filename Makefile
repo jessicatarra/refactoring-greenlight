@@ -56,6 +56,13 @@ generate/auth/mocks:
 	mockery --all --output=ms/auth/internal/service/mocks --dir=ms/auth/internal/service
 
 
+.PHONY: run/test/coverage
+run/test/coverage:
+	@echo 'Run test of auth tags and generate coverage.out file'
+	go test ./... -tags auth -coverprofile=coverage.out
+	@echo 'Generate coverage.html file'
+	 go tool cover -html=coverage.out -o coverage.html
+
 # ====================================================================================
 # # BUILD
 # ==================================================================================== #
