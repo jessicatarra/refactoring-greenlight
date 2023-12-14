@@ -278,7 +278,6 @@ func TestAppl_CreateAuthTokenUseCase(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Arrange
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
-
 		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 
 		expectedUserID := int64(1)
@@ -312,4 +311,71 @@ func TestAppl_CreateAuthTokenUseCase(t *testing.T) {
 		// Assert
 		assert.Error(t, err)
 	})
+}
+
+func TestAppl_ValidateAuthTokenUseCase(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+		expectedUserID := int64(1)
+		expectedUser := &domain.User{
+			ID:        int64(1),
+			Name:      "John Doe",
+			Email:     "john@example.com",
+			Activated: true,
+		}
+		userRepo.On("GetUserById", mock.AnythingOfType("int64")).Return(expectedUser, nil)
+
+		// Act
+		tokenBytes, err := appl.CreateAuthTokenUseCase(expectedUserID)
+		token := string(tokenBytes)
+		user, err := appl.ValidateAuthTokenUseCase(token)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, user.ID, expectedUserID)
+	})
+
+	t.Run("Error - JWT Secret", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, _, wg := Init()
+		cfg := config.Config{
+			BaseURL: "localhost:8082",
+		}
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+		expectedUserID := int64(1)
+		expectedUser := &domain.User{
+			ID:        int64(1),
+			Name:      "John Doe",
+			Email:     "john@example.com",
+			Activated: true,
+		}
+		userRepo.On("GetUserById", mock.AnythingOfType("int64")).Return(expectedUser, nil)
+
+		// Act
+		tokenBytes, err := appl.CreateAuthTokenUseCase(expectedUserID)
+		token := string(tokenBytes)
+		_, err = appl.ValidateAuthTokenUseCase(token)
+
+		// Assert
+		assert.Error(t, err)
+	})
+
+	t.Run("Error - User database", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+		expectedUserID := int64(1)
+		userRepo.On("GetUserById", mock.AnythingOfType("int64")).Return(nil, errors.New("record not found"))
+
+		// Act
+		tokenBytes, err := appl.CreateAuthTokenUseCase(expectedUserID)
+		token := string(tokenBytes)
+		_, err = appl.ValidateAuthTokenUseCase(token)
+
+		// Assert
+		assert.Error(t, err)
+	})
+
 }
