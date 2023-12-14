@@ -10,8 +10,10 @@ import (
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain/mocks"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/infrastructure/repositories"
+	"github.com/pascaldekloe/jwt"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
+	"strconv"
 	"sync"
 	"testing"
 )
@@ -22,6 +24,12 @@ func Init() (mocks.UserRepository, mocks.TokenRepository, mocks.PermissionReposi
 	permissionRepo := mocks.PermissionRepository{}
 	wg := sync.WaitGroup{}
 	cfg := config.Config{
+		BaseURL: "localhost:8082",
+		Jwt: struct {
+			Secret string
+		}{
+			Secret: "ifTp39TukiePBVu7SY1K+l07v8l1aiP+F2Tu9BxQ34c=",
+		},
 		Smtp: struct {
 			Host     string
 			Port     int
@@ -39,7 +47,7 @@ func Init() (mocks.UserRepository, mocks.TokenRepository, mocks.PermissionReposi
 	return userRepo, tokenRepo, permissionRepo, cfg, wg
 }
 
-func TestApp_CreateUseCase(t *testing.T) {
+func TestAppl_CreateUseCase(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		// Initialize the repositories mock
@@ -99,7 +107,7 @@ func TestApp_CreateUseCase(t *testing.T) {
 
 }
 
-func TestApp_GetByEmailUseCase(t *testing.T) {
+func TestAppl_GetByEmailUseCase(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Initialize the repositories mock
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
@@ -152,7 +160,7 @@ func TestApp_GetByEmailUseCase(t *testing.T) {
 	})
 }
 
-func TestApp_ActivateUseCase(t *testing.T) {
+func TestAppl_ActivateUseCase(t *testing.T) {
 
 	t.Run("success", func(t *testing.T) {
 		// Initialize the repositories mock
@@ -262,5 +270,46 @@ func TestApp_ActivateUseCase(t *testing.T) {
 		// Assert the error step for DeleteAllForUser
 		assert.Nil(t, user)
 		assert.Equal(t, err.Error(), expectedErr.Error())
+	})
+}
+
+func TestAppl_CreateAuthTokenUseCase(t *testing.T) {
+
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+
+		expectedUserID := int64(1)
+		expectedSubject := strconv.FormatInt(expectedUserID, 10)
+		expectedIssuer := cfg.BaseURL
+		expectedAudience := []string{cfg.BaseURL}
+
+		// Act
+		tokenBytes, err := appl.CreateAuthTokenUseCase(expectedUserID)
+		token, err := jwt.HMACCheck(tokenBytes, []byte(cfg.Jwt.Secret))
+
+		// Assert
+		assert.NoError(t, err)
+		assert.Equal(t, token.Subject, expectedSubject)
+		assert.Equal(t, token.Issuer, expectedIssuer)
+		assert.Equal(t, token.Audiences, expectedAudience)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		// Arrange
+		cfg := config.Config{
+			BaseURL: "localhost:8082",
+		}
+		userRepo, tokenRepo, permissionRepo, _, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+		expectedUserID := int64(1)
+
+		// Act
+		_, err := appl.CreateAuthTokenUseCase(expectedUserID)
+
+		// Assert
+		assert.Error(t, err)
 	})
 }
