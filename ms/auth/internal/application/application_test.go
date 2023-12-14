@@ -362,7 +362,7 @@ func TestAppl_ValidateAuthTokenUseCase(t *testing.T) {
 		assert.Error(t, err)
 	})
 
-	t.Run("Error - User database", func(t *testing.T) {
+	t.Run("Error - database", func(t *testing.T) {
 		// Arrange
 		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
 		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
@@ -378,4 +378,57 @@ func TestAppl_ValidateAuthTokenUseCase(t *testing.T) {
 		assert.Error(t, err)
 	})
 
+}
+
+func TestAppl_UserPermissionUseCase(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+
+		expectedUserID := int64(1)
+		code := "movie:read"
+		permissions := domain.Permissions{code}
+
+		permissionRepo.On("GetAllForUser", mock.AnythingOfType("int64")).Return(permissions, nil)
+
+		// Act
+		err := appl.UserPermissionUseCase(code, expectedUserID)
+
+		// Assert
+		assert.NoError(t, err)
+	})
+	t.Run("Error - database", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+
+		expectedUserID := int64(1)
+		code := "movie:read"
+
+		permissionRepo.On("GetAllForUser", mock.AnythingOfType("int64")).Return(nil, errors.New("error"))
+
+		// Act
+		err := appl.UserPermissionUseCase(code, expectedUserID)
+
+		// Assert
+		assert.Error(t, err)
+	})
+	t.Run("Error - permission not included", func(t *testing.T) {
+		// Arrange
+		userRepo, tokenRepo, permissionRepo, cfg, wg := Init()
+		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
+
+		expectedUserID := int64(1)
+		code := "movie:read"
+		permissions := domain.Permissions{code}
+
+		permissionRepo.On("GetAllForUser", mock.AnythingOfType("int64")).Return(permissions, nil)
+
+		// Act
+		err := appl.UserPermissionUseCase("movies:write", expectedUserID)
+
+		// Assert
+		assert.Error(t, err)
+	})
 }
