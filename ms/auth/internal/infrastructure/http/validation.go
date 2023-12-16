@@ -38,7 +38,7 @@ func ValidateEmailForAuth(input domain.CreateAuthTokenRequest, existingUser *dom
 	input.Validator.CheckField(existingUser != nil, "Email", "Email address could not be found")
 }
 
-func ValidatePasswordForAuth(input domain.CreateAuthTokenRequest, passwordMatches bool) {
+func ValidatePasswordForAuth(input *domain.CreateAuthTokenRequest, passwordMatches bool) {
 	input.Validator.CheckField(input.Password != "", "Password", "Password is required")
 	input.Validator.CheckField(passwordMatches, "Password", "Password is incorrect")
 }

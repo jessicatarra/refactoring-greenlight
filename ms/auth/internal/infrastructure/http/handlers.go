@@ -165,7 +165,7 @@ func (h *handlers) createAuthenticationToken(res http.ResponseWriter, req *http.
 			return
 		}
 
-		ValidatePasswordForAuth(input, passwordMatches)
+		ValidatePasswordForAuth(&input, passwordMatches)
 	}
 
 	if input.Validator.HasErrors() {

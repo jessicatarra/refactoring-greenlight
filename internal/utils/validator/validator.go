@@ -5,7 +5,7 @@ type Validator struct {
 	FieldErrors map[string]string `json:",omitempty"`
 }
 
-func (v Validator) HasErrors() bool {
+func (v *Validator) HasErrors() bool {
 	return len(v.Errors) != 0 || len(v.FieldErrors) != 0
 }
 

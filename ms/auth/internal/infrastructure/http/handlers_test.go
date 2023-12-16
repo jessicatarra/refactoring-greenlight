@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/jessicatarra/greenlight/internal/password"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain"
 	"github.com/jessicatarra/greenlight/ms/auth/internal/domain/mocks"
 	"github.com/stretchr/testify/mock"
@@ -196,5 +197,227 @@ func TestResource_Activate(t *testing.T) {
 			}
 		}
 		mockApp.AssertCalled(t, "ActivateUseCase", expectedInput.TokenPlaintext)
+	})
+}
+
+func TestResource_AuthenticationToken(t *testing.T) {
+
+	t.Run("success", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		hashedPassword, _ := password.Hash("password123")
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(expectedUser, nil)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusCreated)
+		var responseBody map[string]string
+		assertResponseBody(t, resRec, &responseBody)
+	})
+
+	t.Run("error - bad request status code", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		hashedPassword, _ := password.Hash("password123")
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(expectedUser, nil)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusBadRequest)
+	})
+
+	t.Run("error - GetByEmailUseCase return domain.ErrRecordNotFound error", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		hashedPassword, _ := password.Hash("password123")
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(nil, domain.ErrRecordNotFound)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusUnauthorized)
+	})
+
+	t.Run("error - GetByEmailUseCase return error", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		hashedPassword, _ := password.Hash("password123")
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(nil, errors.New("error"))
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusInternalServerError)
+	})
+
+	t.Run("error - password matches return error", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		expectedUser := &domain.User{
+			ID:        1,
+			Name:      "John Doe",
+			Email:     "johndoe@example.com",
+			Activated: true,
+		}
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(expectedUser, nil)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusInternalServerError)
+	})
+
+	t.Run("error - input validator has error", func(t *testing.T) {
+		// Arrange
+		hashedPassword, _ := password.Hash("password123")
+
+		mockApp, res := setupRouterAndMocks()
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password1"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(expectedUser, nil)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return([]byte("thisisasecreT"), nil)
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusUnprocessableEntity)
+	})
+
+	t.Run("error - token return error", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		hashedPassword, _ := password.Hash("password123")
+		expectedUser := &domain.User{
+			ID:             1,
+			Name:           "John Doe",
+			Email:          "johndoe@example.com",
+			HashedPassword: hashedPassword,
+			Activated:      true,
+		}
+
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+		}`)
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/tokens/authentication", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock GetByEmailUseCase and CreateAuthTokenUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(expectedUser, nil)
+		mockApp.On("CreateAuthTokenUseCase", expectedUser.ID).Return(nil, errors.New("error"))
+
+		// Act
+		res.createAuthenticationToken(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusInternalServerError)
 	})
 }
