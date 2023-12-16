@@ -63,7 +63,7 @@ func (h *handlers) createUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	ValidateUser(input, existingUser)
+	ValidateUser(&input, existingUser)
 
 	if input.Validator.HasErrors() {
 		_errors.FailedValidation(res, req, input.Validator)
@@ -76,7 +76,7 @@ func (h *handlers) createUser(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	user, err := h.appl.CreateUseCase(input, hashedPassword)
+	user, err := h.appl.CreateUseCase(&input, hashedPassword)
 	if err != nil {
 		switch {
 		case errors.Is(err, domain.ErrDuplicateEmail):
@@ -109,7 +109,7 @@ func (h *handlers) activateUser(res http.ResponseWriter, req *http.Request) {
 
 	input.TokenPlaintext = h.helpers.ReadString(qs, "token", "")
 
-	ValidateToken(input)
+	ValidateToken(&input)
 
 	if input.Validator.HasErrors() {
 		_errors.FailedValidation(res, req, input.Validator)
@@ -156,7 +156,7 @@ func (h *handlers) createAuthenticationToken(res http.ResponseWriter, req *http.
 		return
 	}
 
-	ValidateEmailForAuth(input, existingUser)
+	ValidateEmailForAuth(&input, existingUser)
 
 	if existingUser != nil {
 		passwordMatches, err := password.Matches(input.Password, existingUser.HashedPassword)

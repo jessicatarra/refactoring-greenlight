@@ -29,7 +29,7 @@ func (u *User) IsAnonymous() bool {
 }
 
 type Appl interface {
-	CreateUseCase(input CreateUserRequest, hashedPassword string) (*User, error)
+	CreateUseCase(input *CreateUserRequest, hashedPassword string) (*User, error)
 	ActivateUseCase(tokenPlainText string) (*User, error)
 	GetByEmailUseCase(email string) (*User, error)
 	CreateAuthTokenUseCase(userID int64) ([]byte, error)

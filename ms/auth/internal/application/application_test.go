@@ -71,7 +71,7 @@ func TestAppl_CreateUseCase(t *testing.T) {
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the CreateUseCase function
-		user, err := app.CreateUseCase(input, hashedPassword)
+		user, err := app.CreateUseCase(&input, hashedPassword)
 
 		// Assert the results
 		assert.NotNil(t, user)
@@ -98,7 +98,7 @@ func TestAppl_CreateUseCase(t *testing.T) {
 		tokenRepo.On("New", mock.Anything, mock.AnythingOfType("time.Duration"), mock.IsType("string")).Return(nil, nil)
 
 		// Call the CreateUseCase function again
-		user, err := app.CreateUseCase(input, hashedPassword)
+		user, err := app.CreateUseCase(&input, hashedPassword)
 
 		// Assert the error step
 		assert.Nil(t, user)

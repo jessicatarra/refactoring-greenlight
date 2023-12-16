@@ -30,6 +30,7 @@ func createRequestBody() []byte {
 		"email": "johndoe@example.com",
 		"password": "password123"
 	}`)
+
 	return requestBody
 }
 
@@ -68,7 +69,7 @@ func TestResource_Create(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		// Arrange
 		mockApp, res := setupRouterAndMocks()
-		expectedInput := domain.CreateUserRequest{
+		expectedInput := &domain.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",
@@ -98,10 +99,102 @@ func TestResource_Create(t *testing.T) {
 		assertUserFields(t, responseBody, expectedUser)
 	})
 
+	t.Run("error - GetByEmailUseCase return error", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		expectedInput := &domain.CreateUserRequest{
+			Name:     "John Doe",
+			Email:    "johndoe@example.com",
+			Password: "password123",
+		}
+		expectedUser := &domain.User{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "johndoe@example.com",
+		}
+
+		requestBody := createRequestBody()
+		req := httptest.NewRequest(http.MethodPost, "/v1/users", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock CreateUseCase and GetByEmailUseCase
+		mockApp.On("GetByEmailUseCase", expectedUser.Email).Return(nil, errors.New("error"))
+		mockApp.On("CreateUseCase", expectedInput, mock.AnythingOfType("string")).Return(expectedUser, nil)
+
+		// Act
+		res.createUser(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusInternalServerError)
+	})
+
+	t.Run("error - bad request", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		expectedInput := &domain.CreateUserRequest{
+			Name:     "John Doe",
+			Email:    "johndoe@example.com",
+			Password: "password123",
+		}
+		expectedUser := &domain.User{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "johndoe@example.com",
+		}
+
+		requestBody := []byte(`{
+		"email": "johndoe@example.com",
+		"password": "password123"
+	}`)
+		req := httptest.NewRequest(http.MethodPost, "/v1/users", bytes.NewBuffer(requestBody))
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock CreateUseCase and GetByEmailUseCase
+		mockApp.On("CreateUseCase", expectedInput, mock.AnythingOfType("string")).Return(expectedUser, nil)
+		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
+
+		// Act
+		res.createUser(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusUnprocessableEntity)
+	})
+
+	t.Run("error - validate user", func(t *testing.T) {
+		// Arrange
+		mockApp, res := setupRouterAndMocks()
+		expectedInput := &domain.CreateUserRequest{
+			Name:     "John Doe",
+			Email:    "johndoe@example.com",
+			Password: "password123",
+		}
+		expectedUser := &domain.User{
+			ID:    1,
+			Name:  "John Doe",
+			Email: "johndoe@example.com",
+		}
+
+		req := httptest.NewRequest(http.MethodPost, "/v1/users", nil)
+		req.Header.Set("Content-Type", "application/json")
+		resRec := httptest.NewRecorder()
+
+		// Mock CreateUseCase and GetByEmailUseCase
+		mockApp.On("CreateUseCase", expectedInput, mock.AnythingOfType("string")).Return(expectedUser, nil)
+		mockApp.On("GetByEmailUseCase", "johndoe@example.com").Return(nil, errors.New("record not found"))
+
+		// Act
+		res.createUser(resRec, req)
+
+		// Assert
+		assertStatusCode(t, resRec, http.StatusBadRequest)
+	})
+
 	t.Run("error", func(t *testing.T) {
 		// Arrange
 		mockApp, res := setupRouterAndMocks()
-		expectedInput := domain.CreateUserRequest{
+		expectedInput := &domain.CreateUserRequest{
 			Name:     "John Doe",
 			Email:    "johndoe@example.com",
 			Password: "password123",

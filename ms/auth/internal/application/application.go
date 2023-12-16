@@ -32,7 +32,7 @@ func NewAppl(userRepo domain.UserRepository, tokenRepo domain.TokenRepository, p
 	}
 }
 
-func (a *appl) CreateUseCase(input domain.CreateUserRequest, hashedPassword string) (*domain.User, error) {
+func (a *appl) CreateUseCase(input *domain.CreateUserRequest, hashedPassword string) (*domain.User, error) {
 	user := &domain.User{Name: input.Name, Email: input.Email, Activated: false}
 
 	err := a.userRepo.InsertNewUser(user, hashedPassword)
