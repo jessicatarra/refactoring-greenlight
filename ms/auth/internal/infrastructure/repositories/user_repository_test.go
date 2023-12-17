@@ -4,6 +4,9 @@
 package repositories
 
 import (
+	"crypto/sha256"
+	"database/sql"
+	"database/sql/driver"
 	"errors"
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/jessicatarra/greenlight/internal/password"
@@ -12,6 +15,13 @@ import (
 	"testing"
 	"time"
 )
+
+type AnyTime struct{}
+
+func (a AnyTime) Match(v driver.Value) bool {
+	_, ok := v.(time.Time)
+	return ok
+}
 
 func TestUserRepository_InsertNewUser(t *testing.T) {
 	db, mock, err := sqlmock.New()
@@ -204,4 +214,62 @@ func TestUserRepository_GetUserById(t *testing.T) {
 		assert.Error(t, err)
 		assert.Nil(t, user)
 	})
+}
+
+func TestUserRepository_GetForToken(t *testing.T) {
+	db, mock, err := sqlmock.New()
+	assert.NoError(t, err)
+	defer db.Close()
+
+	repo := NewUserRepo(db)
+
+	t.Run("Success", func(t *testing.T) {
+		tokenPlainText := "valid_token"
+		tokenHash := sha256.Sum256([]byte(tokenPlainText))
+		tokenScope := ScopeActivation
+
+		rows := sqlmock.NewRows([]string{"id", "created_at", "name", "email", "password_hash", "activated", "version"}).
+			AddRow(int64(1), time.Now(), "John Doe", "johndoe@example.com", "somehash", true, 1)
+
+		mock.ExpectQuery("SELECT").
+			WithArgs(tokenHash[:], tokenScope, AnyTime{}).
+			WillReturnRows(rows)
+
+		user, err := repo.GetForToken(tokenScope, tokenPlainText)
+
+		// Assert
+		assert.NoError(t, err)
+		assert.NotNil(t, user)
+	})
+
+	t.Run("Error - return ErrDuplicateEmail", func(t *testing.T) {
+		tokenPlainText := "valid_token"
+		tokenHash := sha256.Sum256([]byte(tokenPlainText))
+		tokenScope := ScopeActivation
+
+		mock.ExpectQuery("SELECT").
+			WithArgs(tokenHash[:], tokenScope, AnyTime{}).
+			WillReturnError(sql.ErrNoRows)
+
+		_, err := repo.GetForToken(tokenScope, tokenPlainText)
+
+		// Assert
+		assert.Error(t, err)
+	})
+
+	t.Run("Error - return default error", func(t *testing.T) {
+		tokenPlainText := "valid_token"
+		tokenHash := sha256.Sum256([]byte(tokenPlainText))
+		tokenScope := ScopeActivation
+
+		mock.ExpectQuery("SELECT").
+			WithArgs(tokenHash[:], tokenScope, AnyTime{}).
+			WillReturnError(errors.New("default error"))
+
+		_, err := repo.GetForToken(tokenScope, tokenPlainText)
+
+		// Assert
+		assert.Error(t, err)
+	})
+
 }
