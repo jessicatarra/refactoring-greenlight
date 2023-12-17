@@ -61,7 +61,7 @@ func Init() (cfg Config, err error) {
 
 	flag.StringVar(&cfg.Jwt.Secret, "jwt-secret", "56vphh6sheco5sbtfkxwesy3wx7fpiip", "JWT secret")
 
-	flag.StringVar(&cfg.Auth.HttpBaseURL, "base-url", "http://localhost:8080", "base URL for the application")
+	flag.StringVar(&cfg.Auth.HttpBaseURL, "base-url", "http://localhost:8082", "base URL for the application")
 	flag.StringVar(&cfg.Auth.GrpcBaseURL, "auth-grpc-client-base-url", "localhost:50051", "GRPC client")
 
 	flag.IntVar(&cfg.Auth.HttpPort, "auth-http-port", 8082, "port to listen on for HTTP requests for auth module")

@@ -1,12 +1,12 @@
 include .envrc
 
-.PHONY: run/api
-run/api:
-	go run ./cmd/api -db-dsn=${DATABASE_URL} -cors-trusted-origins=${CORS_TRUSTED_ORIGINS} -jwt-secret=${JWT_SECRET}
+.PHONY: run/mono
+run/mono:
+	go run ./cmd/mono -db-dsn=${DATABASE_URL} -cors-trusted-origins=${CORS_TRUSTED_ORIGINS} -jwt-secret=${JWT_SECRET} -smtp-host=${SMTP_HOST} -smtp-password=${SMTP_PASSWORD} -smtp-username=${SMTP_USERNAME}
 
-.PHONY: run/api/help
-run/api/help:
-	go run ./cmd/api/ -help
+.PHONY: run/mono/help
+run/mono/help:
+	go run ./cmd/mono/ -help
 
 .PHONY: db/migrations/new
 db/migrations/new:
@@ -39,12 +39,12 @@ vendor:
 	@echo 'Vendoring dependencies...'
 	go mod vendor
 
-.PHONY: generate/api/docs
-generate/api/docs:
+.PHONY: generate/mono/docs
+generate/mono/docs:
 	@echo 'Remove docs...'
 	rm -rf docs
 	@echo 'Generate updated docs folder'
-	swag init -d cmd/api,ms/auth/internal/ --parseDependency --parseInternal --parseDepth 2
+	swag init -d cmd/mono,ms/auth/internal/ --parseDependency --parseInternal --parseDepth 2
 
 
 .PHONY: generate/auth/mocks
@@ -69,7 +69,7 @@ run/test/coverage:
 git_description = $(shell git describe --always --dirty --tags --long)
 linker_flags = '-X main.version=${git_description}'
 
-.PHONY: build/api
-build/api:
-	@echo 'Building cmd/api...'
-	go build -ldflags=${linker_flags} -o=./bin/api ./cmd/api
+.PHONY: build/mono
+build/mono:
+	@echo 'Building cmd/mono...'
+	go build -ldflags=${linker_flags} -o=./bin/mono ./cmd/mono
