@@ -106,8 +106,8 @@ func (a *appl) CreateAuthTokenUseCase(userID int64) ([]byte, error) {
 	claims.Issued = jwt.NewNumericTime(time.Now())
 	claims.NotBefore = jwt.NewNumericTime(time.Now())
 	claims.Expires = jwt.NewNumericTime(time.Now().Add(24 * time.Hour))
-	claims.Issuer = a.cfg.BaseURL
-	claims.Audiences = []string{a.cfg.BaseURL}
+	claims.Issuer = a.cfg.Auth.HttpBaseURL
+	claims.Audiences = []string{a.cfg.Auth.HttpBaseURL}
 
 	jwtBytes, err := claims.HMACSign(jwt.HS256, []byte(a.cfg.Jwt.Secret))
 	if err != nil {
@@ -127,12 +127,12 @@ func (a *appl) ValidateAuthTokenUseCase(token string) (*domain.User, error) {
 		return nil, err
 	}
 
-	if claims.Issuer != a.cfg.BaseURL {
+	if claims.Issuer != a.cfg.Auth.HttpBaseURL {
 		return nil, err
 
 	}
 
-	if !claims.AcceptAudience(a.cfg.BaseURL) {
+	if !claims.AcceptAudience(a.cfg.Auth.HttpBaseURL) {
 		return nil, err
 
 	}

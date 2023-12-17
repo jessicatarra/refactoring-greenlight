@@ -60,8 +60,8 @@ func run(logger *slog.Logger) error {
 	defer db.Close()
 
 	initMetrics(db)
-	//TODO: add config variable
-	grpcConn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+
+	grpcConn, err := grpc.Dial(cfg.Auth.GrpcBaseURL, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		logger.Error("did not connect:", err)
 		return err

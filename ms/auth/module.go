@@ -31,6 +31,7 @@ type module struct {
 	grpc   *grpc.Server
 	server *http.Server
 	logger *slog.Logger
+	cfg    *config.Config
 }
 
 func (m module) Start(wg *sync.WaitGroup) {
@@ -51,8 +52,7 @@ func (m module) Start(wg *sync.WaitGroup) {
 
 	go func() {
 		defer wg.Done()
-		//TODO: add config variable
-		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", 50051))
+		lis, err := net.Listen("tcp", fmt.Sprintf(":%d", m.cfg.Auth.GrpcServerPort))
 		if err != nil {
 			log.Fatalf("failed to listen: %v", err)
 		}
@@ -88,8 +88,7 @@ func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.L
 	pb.RegisterAuthGRPCServiceServer(grpcServer, _grpc.NewGRPCServer(appl))
 
 	srv := &http.Server{
-		//TODO: add config variable
-		Addr:         fmt.Sprintf(":%d", 8082),
+		Addr:         fmt.Sprintf(":%d", cfg.Auth.HttpPort),
 		Handler:      api.Routes(),
 		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelWarn),
 		IdleTimeout:  defaultIdleTimeout,
@@ -97,5 +96,5 @@ func NewModule(db *sql.DB, cfg config.Config, wg *sync.WaitGroup, logger *slog.L
 		WriteTimeout: defaultWriteTimeout,
 	}
 
-	return &module{grpc: grpcServer, server: srv, logger: logger}
+	return &module{grpc: grpcServer, server: srv, logger: logger, cfg: &cfg}
 }

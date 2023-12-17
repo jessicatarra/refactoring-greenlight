@@ -24,7 +24,6 @@ func Init() (mocks.UserRepository, mocks.TokenRepository, mocks.PermissionReposi
 	permissionRepo := mocks.PermissionRepository{}
 	wg := sync.WaitGroup{}
 	cfg := config.Config{
-		BaseURL: "localhost:8082",
 		Jwt: struct {
 			Secret string
 		}{
@@ -42,6 +41,17 @@ func Init() (mocks.UserRepository, mocks.TokenRepository, mocks.PermissionReposi
 			Username: "username",
 			Password: "password",
 			From:     "Greenlight <no-reply@tarralva.com>",
+		},
+		Auth: struct {
+			HttpBaseURL    string
+			GrpcBaseURL    string
+			GrpcServerPort int
+			HttpPort       int
+		}{
+			HttpBaseURL:    "localhost:8082",
+			GrpcBaseURL:    "localhost:50051",
+			GrpcServerPort: 50051,
+			HttpPort:       8082,
 		},
 	}
 	return userRepo, tokenRepo, permissionRepo, cfg, wg
@@ -282,8 +292,8 @@ func TestAppl_CreateAuthTokenUseCase(t *testing.T) {
 
 		expectedUserID := int64(1)
 		expectedSubject := strconv.FormatInt(expectedUserID, 10)
-		expectedIssuer := cfg.BaseURL
-		expectedAudience := []string{cfg.BaseURL}
+		expectedIssuer := cfg.Auth.HttpBaseURL
+		expectedAudience := []string{cfg.Auth.HttpBaseURL}
 
 		// Act
 		tokenBytes, err := appl.CreateAuthTokenUseCase(expectedUserID)
@@ -299,7 +309,17 @@ func TestAppl_CreateAuthTokenUseCase(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		// Arrange
 		cfg := config.Config{
-			BaseURL: "localhost:8082",
+			Auth: struct {
+				HttpBaseURL    string
+				GrpcBaseURL    string
+				GrpcServerPort int
+				HttpPort       int
+			}{
+				HttpBaseURL:    "localhost:8082",
+				GrpcBaseURL:    "localhost:50051",
+				GrpcServerPort: 50051,
+				HttpPort:       8082,
+			},
 		}
 		userRepo, tokenRepo, permissionRepo, _, wg := Init()
 		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
@@ -341,7 +361,17 @@ func TestAppl_ValidateAuthTokenUseCase(t *testing.T) {
 		// Arrange
 		userRepo, tokenRepo, permissionRepo, _, wg := Init()
 		cfg := config.Config{
-			BaseURL: "localhost:8082",
+			Auth: struct {
+				HttpBaseURL    string
+				GrpcBaseURL    string
+				GrpcServerPort int
+				HttpPort       int
+			}{
+				HttpBaseURL:    "localhost:8082",
+				GrpcBaseURL:    "localhost:50051",
+				GrpcServerPort: 50051,
+				HttpPort:       8082,
+			},
 		}
 		appl := NewAppl(&userRepo, &tokenRepo, &permissionRepo, &wg, cfg)
 		expectedUserID := int64(1)
