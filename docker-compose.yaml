@@ -15,22 +15,20 @@ services:
       POSTGRES_DB: "greenlight"
     restart: always
 
-#TODO: update docker compose for greenlight app
-#  greenlight:
-#    build:
-#      context: .
-#      args:
-#        API_VERSION: "v1.0.0"
-#      dockerfile: Dockerfile
-#    container_name: greenlight-api
-#    hostname: greenlight-api
-#    env_file: .env
-#    ports:
-#      - "8080:8080"
-#      - "8080:8082"
-#    depends_on:
-#      - database
-#    command: [ "/bin/api"]
+  greenlight:
+    build:
+      context: .
+      args:
+        API_VERSION: "v1.0.0"
+      dockerfile: Dockerfile
+    container_name: greenlight-api
+    hostname: greenlight-api
+    ports:
+      - "8080:8080"
+      - "8082:8082"
+    depends_on:
+      - database
+    command: [ "/bin/mono"]
 
 
 
