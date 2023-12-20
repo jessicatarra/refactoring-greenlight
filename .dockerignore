@@ -22,7 +22,7 @@
 **/go.work
 
 # secrets
-**/.envrc
+#**/.envrc
 **/.env
 
 # flyctl launch added from .idea/.gitignore
