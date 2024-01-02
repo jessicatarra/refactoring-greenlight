@@ -1,6 +1,7 @@
-## Refactoring Greenlight application 
 
 [![Go Coverage](https://github.com/jessicatarra/refactoring-greenlight/wiki/coverage.svg)](https://raw.githack.com/wiki/jessicatarra/refactoring-greenlight/coverage.html)
+
+## Refactoring Greenlight application 
 
 This project aims to refactor the Greenlight application by implementing clean architecture and SOLID principles. The goal is to improve the codebase's maintainability, scalability, and testability while increasing test coverage.
 
@@ -43,11 +44,11 @@ The diagram represents the initial phase of the refactor process, focusing on se
 ### TODO
 - [x] Implement a modular monolith architecture style
 - [ ] Refactor initial implementation into separate modules 
-  - [ ] Add an authentication module
+  - [x] Add an authentication module
     - [x] Implement the create user feature
     - [x] Implement the activate user feature
     - [x] Implement the create authentication token feature
-    - [ ] Create auth specific middleware
+    - [x] Create auth gRPC methods
   - [ ] Add a movies module
   - [ ] Add a healthcheck module
 - [x] Refactor multiple functionalities into internal packages
@@ -63,7 +64,7 @@ The diagram represents the initial phase of the refactor process, focusing on se
   - [x] Add errors package
   - [x] Add config package
   - [x] Add shared middleware package
-
+        
 ### References
 
 - https://github.com/golang-standards/project-layout
